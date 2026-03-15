@@ -135,6 +135,69 @@ export class Page implements IPage {
   async scroll(direction: string = 'down', amount: number = 500): Promise<void> {
     await this.call('tools/call', { name: 'browser_press_key', arguments: { key: direction === 'down' ? 'PageDown' : 'PageUp' } });
   }
+
+  async autoScroll(options: { times?: number; delayMs?: number } = {}): Promise<void> {
+    const times = options.times ?? 3;
+    const delayMs = options.delayMs ?? 2000;
+    for (let i = 0; i < times; i++) {
+        await this.evaluate('() => window.scrollTo(0, document.body.scrollHeight)');
+        await this.wait(delayMs / 1000);
+    }
+  }
+
+  async installInterceptor(pattern: string): Promise<void> {
+    const js = `
+      () => {
+        window.__opencli_xhr = window.__opencli_xhr || [];
+        window.__opencli_patterns = window.__opencli_patterns || [];
+        if (!window.__opencli_patterns.includes('${pattern}')) {
+          window.__opencli_patterns.push('${pattern}');
+        }
+        
+        if (!window.__patched_xhr) {
+          const checkMatch = (url) => window.__opencli_patterns.some(p => url.includes(p));
+
+          const XHR = XMLHttpRequest.prototype;
+          const open = XHR.open;
+          const send = XHR.send;
+          XHR.open = function(method, url) {
+            this._url = url;
+            return open.call(this, method, url, ...Array.prototype.slice.call(arguments, 2));
+          };
+          XHR.send = function() {
+            this.addEventListener('load', function() {
+              if (checkMatch(this._url)) {
+                try { window.__opencli_xhr.push({url: this._url, data: JSON.parse(this.responseText)}); } catch(e){}
+              }
+            });
+            return send.apply(this, arguments);
+          };
+
+          const origFetch = window.fetch;
+          window.fetch = async function(...args) {
+            let u = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
+            const res = await origFetch.apply(this, args);
+            setTimeout(async () => {
+              try {
+                if (checkMatch(u)) {
+                  const clone = res.clone();
+                  const j = await clone.json();
+                  window.__opencli_xhr.push({url: u, data: j});
+                }
+              } catch(e) {}
+            }, 0);
+            return res;
+          };
+          window.__patched_xhr = true;
+        }
+      }
+    `;
+    await this.evaluate(js);
+  }
+
+  async getInterceptedRequests(): Promise<any[]> {
+    return (await this.evaluate('() => window.__opencli_xhr')) || [];
+  }
 }
 
 /**

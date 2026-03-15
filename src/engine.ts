@@ -9,7 +9,8 @@ import { type CliCommand, type Arg, Strategy, registerCommand } from './registry
 import type { IPage } from './types.js';
 import { executePipeline } from './pipeline.js';
 
-export function discoverClis(...dirs: string[]): void {
+export async function discoverClis(...dirs: string[]): Promise<void> {
+  const promises: Promise<any>[] = [];
   for (const dir of dirs) {
     if (!fs.existsSync(dir)) continue;
     for (const site of fs.readdirSync(dir)) {
@@ -19,10 +20,18 @@ export function discoverClis(...dirs: string[]): void {
         const filePath = path.join(siteDir, file);
         if (file.endsWith('.yaml') || file.endsWith('.yml')) {
           registerYamlCli(filePath, site);
+        } else if (file.endsWith('.js')) {
+          // Dynamic import of compiled adapter modules
+          promises.push(
+            import(`file://${filePath}`).catch((err: any) => {
+              process.stderr.write(`Warning: failed to load module ${filePath}: ${err.message}\n`);
+            })
+          );
         }
       }
     }
   }
+  await Promise.all(promises);
 }
 
 function registerYamlCli(filePath: string, defaultSite: string): void {

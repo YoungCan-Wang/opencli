@@ -51,7 +51,16 @@ opencli bilibili hot -v   # 查看已有命令的 pipeline 每步数据流
 - **Request Headers**: Cookie? Bearer? 自定义签名头（X-s、X-t）?
 - **Response Body**: JSON 结构，特别是数据在哪个路径（`data.items`、`data.list`）
 
-### 1c. 框架检测
+### 1c. 高阶 API 发现捷径法则 (Heuristics)
+
+在开始死磕复杂的抓包拦截之前，按照以下优先级进行尝试：
+
+1. **后缀爆破法 (`.json`)**: 像 Reddit 这样复杂的网站，只要在其 URL 后加上 `.json`（例如 `/r/all.json`），就能在带 Cookie 的情况下直接利用 `fetch` 拿到极其干净的 REST 数据（Tier 2 Cookie 策略极速秒杀）。
+2. **全局状态查找法 (`__INITIAL_STATE__`)**: 许多服务端渲染 (SSR) 的网站（如小红书、Bilibili）会将首页或详情页的完整数据挂载到全局 window 对象上。与其去拦截网络请求，不如直接 `page.evaluate('() => window.__INITIAL_STATE__')` 获取整个数据树。
+3. **框架探测与 Store Action 截断**: 如果站点使用 Vue + Pinia，可以使用 `tap` 步骤调用 action，让前端框架代替你完成复杂的鉴权签名封装。
+4. **底层 XHR/Fetch 拦截**: 最后手段，当上述都不行时，使用 TypeScript 适配器进行无侵入式的请求抓取。
+
+### 1d. 框架检测
 
 Explore 自动检测前端框架。如果需要手动确认：
 
@@ -110,9 +119,9 @@ opencli cascade https://api.example.com/hot
 
 ```
 你的 pipeline 里有 evaluate 步骤（内嵌 JS 代码）？
-  → ✅ 用 TypeScript (src/clis/<site>/<name>.ts)，需在 index.ts 注册
+  → ✅ 用 TypeScript (src/clis/<site>/<name>.ts)，保存即自动动态注册
   → ❌ 纯声明式（navigate + tap + map + limit）？
-       → ✅ 用 YAML (src/clis/<site>/<name>.yaml)，放入即自动注册
+       → ✅ 用 YAML (src/clis/<site>/<name>.yaml)，保存即自动注册
 ```
 
 | 场景 | 选择 | 示例 |
@@ -310,7 +319,7 @@ pipeline:
 
 适用于需要嵌入 JS 代码读取 Pinia state、XHR 拦截、GraphQL、分页、复杂数据转换等场景。
 
-文件路径: `src/clis/<site>/<name>.ts`，还需要在 `src/clis/index.ts` 中 import 注册。
+文件路径: `src/clis/<site>/<name>.ts`。文件将会在运行时被动态扫描并注册（切勿在 `index.ts` 中手动 `import`）。
 
 #### Tier 3 — Header 认证（Twitter）
 
@@ -353,84 +362,54 @@ cli({
 });
 ```
 
-#### Tier 4 — Store Action + XHR 拦截（小红书）
+#### Tier 4 — XHR/Fetch 双重拦截 (Twitter/小红书 通用模式)
 
 ```typescript
-// src/clis/xiaohongshu/search.ts
+// src/clis/xiaohongshu/user.ts
 import { cli, Strategy } from '../../registry.js';
 
 cli({
   site: 'xiaohongshu',
-  name: 'search',
-  description: '搜索小红书笔记',
-  strategy: Strategy.COOKIE,   // 实际是 intercept 模式
-  args: [{ name: 'keyword', required: true }],
-  columns: ['rank', 'title', 'author', 'likes', 'type'],
+  name: 'user',
+  description: '获取用户笔记',
+  strategy: Strategy.INTERCEPT,
+  args: [{ name: 'id', required: true }],
+  columns: ['rank', 'title', 'likes', 'url'],
   func: async (page, kwargs) => {
-    await page.goto('https://www.xiaohongshu.com');
-    await page.wait(2);
+    await page.goto(`https://www.xiaohongshu.com/user/profile/${kwargs.id}`);
+    await page.wait(5);
 
-    const data = await page.evaluate(`
-      (async () => {
-        const app = document.querySelector('#app')?.__vue_app__;
-        const pinia = app?.config?.globalProperties?.$pinia;
-        if (!pinia?._s) return { error: 'Page not ready' };
+    // XHR/Fetch 底层拦截：捕获所有包含 'v1/user/posted' 的请求
+    await page.installInterceptor('v1/user/posted');
 
-        const searchStore = pinia._s.get('search');
-        if (!searchStore) return { error: 'Search store not found' };
+    // 触发后端 API：模拟人类用户向底部滚动2次
+    await page.autoScroll({ times: 2, delayMs: 2000 });
 
-        // XHR 拦截：捕获 store action 发出的请求
-        let captured = null;
-        const origOpen = XMLHttpRequest.prototype.open;
-        const origSend = XMLHttpRequest.prototype.send;
-        XMLHttpRequest.prototype.open = function(m, u) {
-          this.__url = u;
-          return origOpen.apply(this, arguments);
-        };
-        XMLHttpRequest.prototype.send = function(b) {
-          if (this.__url?.includes('search/notes')) {
-            const x = this;
-            const orig = x.onreadystatechange;
-            x.onreadystatechange = function() {
-              if (x.readyState === 4 && !captured) {
-                try { captured = JSON.parse(x.responseText); } catch {}
-              }
-              if (orig) orig.apply(this, arguments);
-            };
-          }
-          return origSend.apply(this, arguments);
-        };
+    // 提取所有被拦截捕获的 JSON 响应体
+    const requests = await page.getInterceptedRequests();
+    if (!requests || requests.length === 0) return [];
 
-        try {
-          // 触发 Store Action，让网站自己签名发请求
-          searchStore.mutateSearchValue('${kwargs.keyword}');
-          await searchStore.loadMore();
-          await new Promise(r => setTimeout(r, 800));
-        } finally {
-          // 恢复原始 XHR
-          XMLHttpRequest.prototype.open = origOpen;
-          XMLHttpRequest.prototype.send = origSend;
+    let results = [];
+    for (const req of requests) {
+      if (req.data?.data?.notes) {
+        for (const note of req.data.data.notes) {
+           results.push({
+             title: note.display_title || '',
+             likes: note.interact_info?.liked_count || '0',
+             url: `https://explore/${note.note_id || note.id}`
+           });
         }
+      }
+    }
 
-        if (!captured?.success) return { error: captured?.msg || 'Search failed' };
-        return (captured.data?.items || []).map(i => ({
-          title: i.note_card?.display_title || '',
-          author: i.note_card?.user?.nickname || '',
-          likes: i.note_card?.interact_info?.liked_count || '0',
-          type: i.note_card?.type || '',
-        }));
-      })()
-    `);
-
-    if (!Array.isArray(data)) return [];
-    return data.slice(0, kwargs.limit || 20).map((item, i) => ({
+    return results.slice(0, 20).map((item, i) => ({
       rank: i + 1, ...item,
     }));
   },
 });
 ```
 
-> **XHR 拦截核心思路**：不自己构造签名，而是劫持网站自己的 `XMLHttpRequest`，让网站的 Store Action 发出正确签名的请求，我们只是"窃听"响应。用完后必须恢复原始方法。
+> **拦截核心思路**：不自己构造签名，而是利用 `installInterceptor` 劫持网站自己的 `XMLHttpRequest` 和 `fetch`，让网站发请求，我们直接在底层取出解析好的 `response.json()`。
 
 ---
 
@@ -537,11 +516,7 @@ opencli mysite hot -f csv > data.csv
 
 ### TS 适配器
 
-在 `src/clis/index.ts` 添加 import：
-
-```typescript
-import './mysite/search.js';
-```
+放入 `src/clis/<site>/<name>.ts` 即自动加载模块，无需在 `index.ts` 中写入 `import`。
 
 ### 验证注册
 

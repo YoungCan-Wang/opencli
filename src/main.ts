@@ -12,7 +12,6 @@ import chalk from 'chalk';
 import { discoverClis, executeCommand } from './engine.js';
 import { type CliCommand, fullName, getRegistry, strategyLabel } from './registry.js';
 import { render as renderOutput } from './output.js';
-import './clis/index.js';
 import { PlaywrightMCP } from './browser.js';
 import { browserSession, DEFAULT_BROWSER_COMMAND_TIMEOUT, runWithTimeout } from './runtime.js';
 
@@ -25,7 +24,7 @@ const USER_CLIS = path.join(os.homedir(), '.opencli', 'clis');
 const pkgJsonPath = path.resolve(__dirname, '..', 'package.json');
 const PKG_VERSION = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')).version ?? '0.0.0';
 
-discoverClis(BUILTIN_CLIS, USER_CLIS);
+await discoverClis(BUILTIN_CLIS, USER_CLIS);
 
 const program = new Command();
 program.name('opencli').description('Make any website your CLI. Zero setup. AI-powered.').version(PKG_VERSION);
@@ -104,8 +103,15 @@ for (const [, cmd] of registry) {
       if (cmd.browser) {
         result = await browserSession(PlaywrightMCP, async (page) => runWithTimeout(executeCommand(cmd, page, kwargs, actionOpts.verbose), { timeout: cmd.timeoutSeconds ?? DEFAULT_BROWSER_COMMAND_TIMEOUT, label: fullName(cmd) }));
       } else { result = await executeCommand(cmd, null, kwargs, actionOpts.verbose); }
+      if (actionOpts.verbose && (!result || (Array.isArray(result) && result.length === 0))) {
+        console.error(chalk.yellow(`[Verbose] Warning: Command returned an empty result. If the website structural API changed or requires authentication, check the network or update the adapter.`));
+      }
       renderOutput(result, { fmt: actionOpts.format, columns: cmd.columns, title: `${cmd.site}/${cmd.name}`, elapsed: (Date.now() - startTime) / 1000, source: fullName(cmd) });
-    } catch (err: any) { console.error(chalk.red(`Error: ${err.message ?? err}`)); process.exitCode = 1; }
+    } catch (err: any) { 
+      if (actionOpts.verbose && err.stack) { console.error(chalk.red(err.stack)); }
+      else { console.error(chalk.red(`Error: ${err.message ?? err}`)); }
+      process.exitCode = 1; 
+    }
   });
 }
 

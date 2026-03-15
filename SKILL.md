@@ -209,7 +209,7 @@ pipeline:
 
 ### TypeScript Adapter (programmatic)
 
-Create `src/clis/<site>/<name>.ts` and import in `clis/index.ts`:
+Create `src/clis/<site>/<name>.ts`. It will be automatically dynamically loaded (DO NOT manually import it in `index.ts`):
 
 ```typescript
 import { cli, Strategy } from '../../registry.js';
@@ -217,27 +217,33 @@ import { cli, Strategy } from '../../registry.js';
 cli({
   site: 'mysite',
   name: 'search',
-  strategy: Strategy.COOKIE,
+  strategy: Strategy.INTERCEPT, // Or COOKIE
   args: [{ name: 'keyword', required: true }],
   columns: ['rank', 'title', 'url'],
   func: async (page, kwargs) => {
-    await page.goto('https://www.mysite.com');
-    const data = await page.evaluate(`
-      (async () => {
-        const res = await fetch('/api/search?q=${kwargs.keyword}', {
-          credentials: 'include'
-        });
-        return await res.json();
-      })()
-    `);
-    return data.items.map((item, i) => ({
+    await page.goto('https://www.mysite.com/search');
+    
+    // Inject native XHR/Fetch interceptor hook
+    await page.installInterceptor('/api/search');
+    
+    // Auto scroll down to trigger lazy loading
+    await page.autoScroll({ times: 3, delayMs: 2000 });
+    
+    // Retrieve intercepted JSON payloads
+    const requests = await page.getInterceptedRequests();
+    
+    let results = [];
+    for (const req of requests) {
+      results.push(...req.data.items);
+    }
+    return results.map((item, i) => ({
       rank: i + 1, title: item.title, url: item.url,
     }));
   },
 });
 ```
 
-**When to use TS**: XHR interception (小红书), cookie extraction (Twitter ct0), Wbi signing (Bilibili), auto-pagination, complex data transforms.
+**When to use TS**: XHR interception (`page.installInterceptor`), infinite scrolling (`page.autoScroll`), cookie extraction, complex data transforms (like GraphQL unwrapping).
 
 ## Pipeline Steps
 

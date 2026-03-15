@@ -14,8 +14,10 @@ OpenCLI 通过 Chrome 浏览器 + [Playwright MCP Bridge](https://github.com/nic
 - 🌐 **28+ 命令，16 个站点** — B站、知乎、小红书、Twitter、Reddit、GitHub、V2EX、Hacker News、BBC、微博、BOSS直聘、Yahoo Finance、路透社、什么值得买、携程、YouTube
 - 🔐 **零风控** — 复用 Chrome 登录态，无需存储任何凭证
 - 🤖 **AI 原生** — `explore` 自动发现 API，`synthesize` 生成适配器，`cascade` 探测认证策略
-- 📝 **声明式 YAML** — 大部分适配器只需 ~30 行 YAML
-- 🔌 **TypeScript 扩展** — 复杂场景（XHR 拦截、GraphQL）可用 TS 编写
+- 🚀 **动态加载引擎** — 只需将 `.ts` 或 `.yaml` 适配器放入 `clis/` 文件夹即可自动注册生效
+- 📝 **双引擎架构设计**:
+  - **YAML 声明式引擎**：大部分适配器只需极简的 ~30 行 YAML 声明
+  - **原生浏览器注入引擎**：提供高级 TS API（`installInterceptor`、`autoScroll`）轻松实现 XHR 劫持、GraphQL 解包及状态库注入
 
 ## 🚀 快速开始
 

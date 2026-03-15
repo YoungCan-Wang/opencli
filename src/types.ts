@@ -20,4 +20,7 @@ export interface IPage {
   networkRequests(includeStatic?: boolean): Promise<any>;
   consoleMessages(level?: string): Promise<any>;
   scroll(direction?: string, amount?: number): Promise<void>;
+  autoScroll(options?: { times?: number; delayMs?: number }): Promise<void>;
+  installInterceptor(pattern: string): Promise<void>;
+  getInterceptedRequests(): Promise<any[]>;
 }

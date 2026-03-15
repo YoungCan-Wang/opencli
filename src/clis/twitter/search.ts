@@ -19,38 +19,13 @@ cli({
     await page.wait(5);
 
     // 2. Inject XHR interceptor
-    await page.evaluate(`
-      () => {
-        window.__opencli_xhr = [];
-        if (!window.__patched_xhr) {
-          const XHR = XMLHttpRequest.prototype;
-          const open = XHR.open;
-          const send = XHR.send;
-          XHR.open = function(method, url) {
-            this._url = url;
-            return open.call(this, method, url, ...Array.prototype.slice.call(arguments, 2));
-          };
-          XHR.send = function() {
-            this.addEventListener('load', function() {
-              if(this._url.includes('SearchTimeline')) {
-                try { window.__opencli_xhr.push({url: this._url, data: JSON.parse(this.responseText)}); } catch(e){}
-              }
-            });
-            return send.apply(this, arguments);
-          };
-          window.__patched_xhr = true;
-        }
-      }
-    `);
+    await page.installInterceptor('SearchTimeline');
 
     // 3. Trigger API by scrolling
-    for (let i = 0; i < 3; i++) {
-        await page.evaluate('() => window.scrollTo(0, document.body.scrollHeight)');
-        await page.wait(2);
-    }
+    await page.autoScroll({ times: 3, delayMs: 2000 });
     
     // 4. Retrieve data
-    const requests = await page.evaluate('() => window.__opencli_xhr');
+    const requests = await page.getInterceptedRequests();
     if (!requests || requests.length === 0) return [];
 
     let results: any[] = [];

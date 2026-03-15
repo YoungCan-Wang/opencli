@@ -13,8 +13,10 @@ A CLI tool that turns **any website** into a command-line interface. **28+ comma
 
 - 🔐 **Account-safe** — Reuses Chrome's logged-in state; your credentials never leave the browser
 - 🤖 **AI Agent ready** — `explore` discovers APIs, `synthesize` generates adapters, `cascade` finds auth strategies
-- 📝 **Declarative YAML** — Most adapters are ~30 lines of YAML pipeline
-- 🔌 **TypeScript escape hatch** — Complex adapters (XHR interception, GraphQL) in TS
+- 🚀 **Dynamic Loader** — Simply drop `.ts` or `.yaml` adapters into the `clis/` folder for auto-registration
+- 📝 **Dual-Engine Architecture**:
+  - **YAML Declarative Engine**: Most adapters are minimal ~30 lines of YAML pipeline
+  - **Native Browser Injection Engine**: Advanced TypeScript utilities (`installInterceptor`, `autoScroll`) for XHR hijacking, GraphQL unwrapping, and store mutation
 
 ## 🚀 Quick Start
 
