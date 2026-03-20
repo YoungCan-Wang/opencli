@@ -109,10 +109,23 @@ export function runCli(BUILTIN_CLIS: string, USER_CLIS: string): void {
       printCompletionScript(shell);
     });
 
+  // ── Antigravity serve (built-in, long-running) ──────────────────────────────
+
+  const antigravityCmd = program.command('antigravity').description('antigravity commands');
+  antigravityCmd.command('serve')
+    .description('Start Anthropic-compatible API proxy for Antigravity')
+    .option('--port <port>', 'Server port (default: 8082)', '8082')
+    .action(async (opts) => {
+      const { startServe } = await import('./clis/antigravity/serve.js');
+      await startServe({ port: parseInt(opts.port) });
+    });
+
   // ── Dynamic site commands ──────────────────────────────────────────────────
 
   const registry = getRegistry();
   const siteGroups = new Map<string, Command>();
+  // Pre-seed with the antigravity command registered above to avoid duplicates
+  siteGroups.set('antigravity', antigravityCmd);
 
   for (const [, cmd] of registry) {
     let siteCmd = siteGroups.get(cmd.site);
