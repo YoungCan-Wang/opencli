@@ -9,9 +9,12 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { execSync, execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { PLUGINS_DIR } from './discovery.js';
 import { getErrorMessage } from './errors.js';
 import { log } from './logger.js';
+
+const isWindows = process.platform === 'win32';
 
 /** Get home directory, respecting HOME environment variable for test isolation. */
 function getHomeDir(): string {
@@ -132,6 +135,7 @@ function postInstallLifecycle(pluginDir: string): void {
       cwd: pluginDir,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
+      ...(isWindows && { shell: true }),
     });
   } catch (err) {
     console.error(`[plugin] npm install failed in ${pluginDir}: ${err instanceof Error ? err.message : err}`);
@@ -383,7 +387,7 @@ function linkHostOpencli(pluginDir: string): void {
     // Determine the host opencli package root from this module's location.
     // Both dev (tsx src/plugin.ts) and prod (node dist/plugin.js) are one level
     // deep, so path.dirname + '..' always gives us the package root.
-    const thisFile = new URL(import.meta.url).pathname;
+    const thisFile = fileURLToPath(import.meta.url);
     const hostRoot = path.resolve(path.dirname(thisFile), '..');
 
     const targetLink = path.join(pluginDir, 'node_modules', '@jackwener', 'opencli');
@@ -396,8 +400,10 @@ function linkHostOpencli(pluginDir: string): void {
     // Ensure parent directory exists
     fs.mkdirSync(path.dirname(targetLink), { recursive: true });
 
-    // Create symlink
-    fs.symlinkSync(hostRoot, targetLink, 'dir');
+    // Use 'junction' on Windows (doesn't require admin privileges),
+    // 'dir' symlink on other platforms.
+    const linkType = isWindows ? 'junction' : 'dir';
+    fs.symlinkSync(hostRoot, targetLink, linkType);
     log.debug(`Linked host opencli into plugin: ${targetLink} → ${hostRoot}`);
   } catch (err: any) {
     log.warn(`Failed to link host opencli into plugin: ${err.message}`);
@@ -408,33 +414,51 @@ function linkHostOpencli(pluginDir: string): void {
  * Resolve the path to the esbuild CLI executable with fallback strategies.
  */
 export function resolveEsbuildBin(): string | null {
-  try {
-    const pkgUrl = import.meta.resolve('esbuild/package.json');
-    if (pkgUrl.startsWith('file://')) {
-      const pkgPath = new URL(pkgUrl).pathname;
-      const pkgRaw = fs.readFileSync(pkgPath, 'utf8');
-      const pkg = JSON.parse(pkgRaw);
-      if (pkg.bin && typeof pkg.bin === 'object' && pkg.bin.esbuild) {
-        const binPath = path.resolve(path.dirname(pkgPath), pkg.bin.esbuild);
-        if (fs.existsSync(binPath)) return binPath;
-      } else if (typeof pkg.bin === 'string') {
-        const binPath = path.resolve(path.dirname(pkgPath), pkg.bin);
-        if (fs.existsSync(binPath)) return binPath;
-      }
+  const thisFile = fileURLToPath(import.meta.url);
+  const hostRoot = path.resolve(path.dirname(thisFile), '..');
+
+  // Strategy 1 (Windows): prefer the .cmd wrapper which is executable via shell
+  if (isWindows) {
+    const cmdPath = path.join(hostRoot, 'node_modules', '.bin', 'esbuild.cmd');
+    if (fs.existsSync(cmdPath)) {
+      return cmdPath;
     }
-  } catch {
-    // ignore package resolution failures
   }
 
-  const thisFile = new URL(import.meta.url).pathname;
-  const hostRoot = path.resolve(path.dirname(thisFile), '..');
+  // Strategy 2: resolve esbuild binary via import.meta.resolve
+  // (On Unix, shebang scripts are directly executable; on Windows they are not,
+  //  so this strategy is skipped on Windows in favour of the .cmd wrapper above.)
+  if (!isWindows) {
+    try {
+      const pkgUrl = import.meta.resolve('esbuild/package.json');
+      if (pkgUrl.startsWith('file://')) {
+        const pkgPath = fileURLToPath(pkgUrl);
+        const pkgRaw = fs.readFileSync(pkgPath, 'utf8');
+        const pkg = JSON.parse(pkgRaw);
+        if (pkg.bin && typeof pkg.bin === 'object' && pkg.bin.esbuild) {
+          const binPath = path.resolve(path.dirname(pkgPath), pkg.bin.esbuild);
+          if (fs.existsSync(binPath)) return binPath;
+        } else if (typeof pkg.bin === 'string') {
+          const binPath = path.resolve(path.dirname(pkgPath), pkg.bin);
+          if (fs.existsSync(binPath)) return binPath;
+        }
+      }
+    } catch {
+      // ignore package resolution failures
+    }
+  }
+
+  // Strategy 3: fallback to node_modules/.bin/esbuild (Unix)
   const binFallback = path.join(hostRoot, 'node_modules', '.bin', 'esbuild');
   if (fs.existsSync(binFallback)) {
     return binFallback;
   }
 
+  // Strategy 4: global esbuild in PATH
   try {
-    const globalBin = execSync('which esbuild', { encoding: 'utf-8', stdio: 'pipe' }).trim();
+    const lookupCmd = isWindows ? 'where esbuild' : 'which esbuild';
+    // `where` on Windows may return multiple lines; take only the first match.
+    const globalBin = execSync(lookupCmd, { encoding: 'utf-8', stdio: 'pipe' }).trim().split('\n')[0].trim();
     if (globalBin && fs.existsSync(globalBin)) {
       return globalBin;
     }
@@ -475,6 +499,7 @@ function transpilePluginTs(pluginDir: string): void {
           cwd: pluginDir,
           encoding: 'utf-8',
           stdio: ['pipe', 'pipe', 'pipe'],
+          ...(isWindows && { shell: true }),
         });
         log.debug(`Transpiled plugin file: ${tsFile} → ${jsFile}`);
       } catch (err: any) {
