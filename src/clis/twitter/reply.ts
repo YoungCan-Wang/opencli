@@ -14,6 +14,7 @@ const SUPPORTED_IMAGE_EXTENSIONS = new Set([
   '.gif',
   '.webp',
 ]);
+const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB (Twitter allows 5MB images, 15MB GIFs)
 const CONTENT_TYPE_TO_EXTENSION: Record<string, string> = {
   'image/jpeg': '.jpg',
   'image/jpg': '.jpg',
@@ -93,27 +94,39 @@ async function downloadRemoteImage(imageUrl: string): Promise<string> {
     throw new Error(`Image download failed: HTTP ${response.status}`);
   }
 
+  const contentLength = Number(response.headers.get('content-length') || '0');
+  if (contentLength > MAX_IMAGE_SIZE_BYTES) {
+    throw new Error(`Image too large: ${(contentLength / 1024 / 1024).toFixed(1)} MB (max ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024} MB)`);
+  }
+
   const ext = resolveImageExtension(imageUrl, response.headers.get('content-type'));
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'opencli-twitter-reply-'));
   const tmpPath = path.join(tmpDir, `image${ext}`);
   const buffer = Buffer.from(await response.arrayBuffer());
+  if (buffer.byteLength > MAX_IMAGE_SIZE_BYTES) {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    throw new Error(`Image too large: ${(buffer.byteLength / 1024 / 1024).toFixed(1)} MB (max ${MAX_IMAGE_SIZE_BYTES / 1024 / 1024} MB)`);
+  }
   fs.writeFileSync(tmpPath, buffer);
   return tmpPath;
 }
 
 async function attachReplyImage(page: IPage, absImagePath: string): Promise<void> {
+  let uploaded = false;
   if (page.setFileInput) {
     try {
       await page.setFileInput([absImagePath], REPLY_FILE_INPUT_SELECTOR);
+      uploaded = true;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (!msg.includes('Unknown action') && !msg.includes('not supported')) {
         throw new Error(`Image upload failed: ${msg}`);
       }
+      // setFileInput not supported by extension — fall through to base64 fallback
     }
   }
 
-  if (!page.setFileInput) {
+  if (!uploaded) {
     const ext = path.extname(absImagePath).toLowerCase();
     const mimeType = ext === '.png'
       ? 'image/png'
@@ -180,26 +193,25 @@ async function submitReply(page: IPage, text: string): Promise<{ ok: boolean; me
 
           box.focus();
           const textToInsert = ${JSON.stringify(text)};
-          const dataTransfer = new DataTransfer();
-          dataTransfer.setData('text/plain', textToInsert);
-          box.dispatchEvent(new ClipboardEvent('paste', {
-              clipboardData: dataTransfer,
-              bubbles: true,
-              cancelable: true
-          }));
+          // execCommand('insertText') is more reliable with Twitter's Draft.js editor
+          if (!document.execCommand('insertText', false, textToInsert)) {
+              // Fallback to paste event if execCommand fails
+              const dataTransfer = new DataTransfer();
+              dataTransfer.setData('text/plain', textToInsert);
+              box.dispatchEvent(new ClipboardEvent('paste', {
+                  clipboardData: dataTransfer,
+                  bubbles: true,
+                  cancelable: true
+              }));
+          }
 
           await new Promise(r => setTimeout(r, 1000));
 
           const buttons = Array.from(
               document.querySelectorAll('[data-testid="tweetButton"], [data-testid="tweetButtonInline"]')
           );
-          const btn = buttons.find((el) => visible(el) && !el.disabled)
-              || buttons.find(visible)
-              || buttons[0];
+          const btn = buttons.find((el) => visible(el) && !el.disabled);
           if (!btn) {
-              return { ok: false, message: 'Reply button is disabled or not found.' };
-          }
-          if (btn.disabled) {
               return { ok: false, message: 'Reply button is disabled or not found.' };
           }
 
