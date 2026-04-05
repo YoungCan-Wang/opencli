@@ -3,9 +3,9 @@
  */
 
 import * as path from 'node:path';
-import chalk from 'chalk';
-import { cli, Strategy } from '../../src/registry.js';
-import { CliError } from '../../src/errors.js';
+import { cli, Strategy } from '@jackwener/opencli/registry';
+import { CliError } from '@jackwener/opencli/errors';
+import { log } from '@jackwener/opencli/logger';
 import { YOLLOMI_DOMAIN, yollomiPost, downloadOutput, fmtBytes } from './utils.js';
 
 cli({
@@ -23,7 +23,7 @@ cli({
   columns: ['status', 'file', 'size', 'scale', 'url'],
   func: async (page, kwargs) => {
     const scale = parseInt(kwargs.scale as string, 10);
-    process.stderr.write(chalk.dim(`Upscaling ${scale}x...\n`));
+    log.status(`Upscaling ${scale}x...`);
     const data = await yollomiPost(page, '/api/ai/image-upscaler', {
       imageUrl: kwargs.image as string,
       scale,
@@ -40,7 +40,7 @@ cli({
       const ext = urlPath.endsWith('.png') || urlPath.endsWith('.webp') ? urlPath.slice(urlPath.lastIndexOf('.')) : '.jpg';
       const filename = `yollomi_upscale_${scale}x_${Date.now()}${ext}`;
       const { path: fp, size } = await downloadOutput(url, kwargs.output as string, filename);
-      if (data.remainingCredits !== undefined) process.stderr.write(chalk.dim(`Credits remaining: ${data.remainingCredits}\n`));
+      if (data.remainingCredits !== undefined) log.status(`Credits remaining: ${data.remainingCredits}`);
       return [{ status: 'saved', file: path.relative('.', fp), size: fmtBytes(size), scale: `${scale}x`, url }];
     } catch {
       return [{ status: 'download-failed', file: '-', size: '-', scale: `${scale}x`, url }];

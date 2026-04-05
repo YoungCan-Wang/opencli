@@ -1,17 +1,17 @@
 import * as os from 'node:os';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { CliCommand } from '../../src/registry.js';
-import { getRegistry } from '../../src/registry.js';
-import { ArgumentError, AuthRequiredError, CliError, CommandExecutionError } from '../../src/errors.js';
-import type { IPage } from '../../src/types.js';
+import type { CliCommand } from '@jackwener/opencli/registry';
+import { getRegistry } from '@jackwener/opencli/registry';
+import { ArgumentError, AuthRequiredError, CliError, CommandExecutionError } from '@jackwener/opencli/errors';
+import type { IPage } from '@jackwener/opencli/types';
 
 const { mockHttpDownload, logSpy } = vi.hoisted(() => ({
   mockHttpDownload: vi.fn(),
   logSpy: vi.spyOn(console, 'log').mockImplementation(() => undefined),
 }));
 
-vi.mock('../../download/index.js', async () => {
-  const actual = await vi.importActual<object>('../../download/index.js');
+vi.mock('@jackwener/opencli/download', async () => {
+  const actual = await vi.importActual<object>('@jackwener/opencli/download');
   return { ...actual, httpDownload: mockHttpDownload };
 });
 

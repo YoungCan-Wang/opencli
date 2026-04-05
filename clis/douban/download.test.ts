@@ -1,8 +1,8 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import path from 'node:path';
-import type { CliCommand } from '../../src/registry.js';
-import { getRegistry } from '../../src/registry.js';
-import type { IPage } from '../../src/types.js';
+import type { CliCommand } from '@jackwener/opencli/registry';
+import { getRegistry } from '@jackwener/opencli/registry';
+import type { IPage } from '@jackwener/opencli/types';
 
 const { mockHttpDownload, mockLoadDoubanSubjectPhotos, mockMkdirSync } = vi.hoisted(() => ({
   mockHttpDownload: vi.fn(),
@@ -10,7 +10,7 @@ const { mockHttpDownload, mockLoadDoubanSubjectPhotos, mockMkdirSync } = vi.hois
   mockMkdirSync: vi.fn(),
 }));
 
-vi.mock('../../download/index.js', () => ({
+vi.mock('@jackwener/opencli/download', () => ({
   httpDownload: mockHttpDownload,
   sanitizeFilename: vi.fn((value: string) => value.replace(/\s+/g, '_')),
 }));
@@ -23,7 +23,7 @@ vi.mock('./utils.js', async () => {
   };
 });
 
-vi.mock('../../download/progress.js', () => ({
+vi.mock('@jackwener/opencli/download/progress', () => ({
   formatBytes: vi.fn((size: number) => `${size} B`),
 }));
 

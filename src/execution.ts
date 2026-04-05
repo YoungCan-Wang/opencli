@@ -15,6 +15,7 @@ import type { IPage } from './types.js';
 import { pathToFileURL } from 'node:url';
 import { executePipeline } from './pipeline/index.js';
 import { AdapterLoadError, ArgumentError, BrowserConnectError, CommandExecutionError, getErrorMessage } from './errors.js';
+import { isDiagnosticEnabled, collectDiagnostic, emitDiagnostic } from './diagnostic.js';
 import { shouldUseBrowserSession } from './capabilityRouting.js';
 import { getBrowserFactory, browserSession, runWithTimeout, DEFAULT_BROWSER_COMMAND_TIMEOUT } from './runtime.js';
 import { emitHook, type HookContext } from './hooks.js';
@@ -165,6 +166,7 @@ export async function executeCommand(
   await emitHook('onBeforeExecute', hookCtx);
 
   let result: unknown;
+  let diagnosticEmitted = false;
   try {
     if (shouldUseBrowserSession(cmd)) {
       const electron = isElectronApp(cmd.site);
@@ -219,10 +221,21 @@ export async function executeCommand(
             if (debug) log.debug(`[pre-nav] Failed to navigate to ${preNav.url}: ${err instanceof Error ? err.message : err}`);
           }
         }
-        return runWithTimeout(runCommand(cmd, page, kwargs, debug), {
-          timeout: cmd.timeoutSeconds ?? DEFAULT_BROWSER_COMMAND_TIMEOUT,
-          label: fullName(cmd),
-        });
+        try {
+          return await runWithTimeout(runCommand(cmd, page, kwargs, debug), {
+            timeout: cmd.timeoutSeconds ?? DEFAULT_BROWSER_COMMAND_TIMEOUT,
+            label: fullName(cmd),
+          });
+        } catch (err) {
+          // Collect diagnostic while page is still alive (before browserSession closes it).
+          if (isDiagnosticEnabled()) {
+            const internal = cmd as InternalCliCommand;
+            const ctx = await collectDiagnostic(err, internal, page);
+            emitDiagnostic(ctx);
+            diagnosticEmitted = true;
+          }
+          throw err;
+        }
       }, { workspace: `site:${cmd.site}`, cdpEndpoint });
     } else {
       // Non-browser commands: apply timeout only when explicitly configured.
@@ -238,6 +251,13 @@ export async function executeCommand(
       }
     }
   } catch (err) {
+    // Emit diagnostic if not already emitted (browser session emits with page state;
+    // this fallback covers non-browser commands and pre-session failures like BrowserConnectError).
+    if (isDiagnosticEnabled() && !diagnosticEmitted) {
+      const internal = cmd as InternalCliCommand;
+      const ctx = await collectDiagnostic(err, internal, null);
+      emitDiagnostic(ctx);
+    }
     hookCtx.error = err;
     hookCtx.finishedAt = Date.now();
     await emitHook('onAfterExecute', hookCtx);

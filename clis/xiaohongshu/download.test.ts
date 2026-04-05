@@ -1,20 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { IPage } from '../../src/types.js';
+import type { IPage } from '@jackwener/opencli/types';
 
 const { mockDownloadMedia, mockFormatCookieHeader } = vi.hoisted(() => ({
   mockDownloadMedia: vi.fn(),
   mockFormatCookieHeader: vi.fn(() => 'a=b'),
 }));
 
-vi.mock('../../download/media-download.js', () => ({
+vi.mock('@jackwener/opencli/download/media-download', () => ({
   downloadMedia: mockDownloadMedia,
 }));
 
-vi.mock('../../download/index.js', () => ({
+vi.mock('@jackwener/opencli/download', () => ({
   formatCookieHeader: mockFormatCookieHeader,
 }));
 
-import { getRegistry } from '../../src/registry.js';
+import { getRegistry } from '@jackwener/opencli/registry';
 import './download.js';
 
 function createPageMock(evaluateResult: any): IPage {

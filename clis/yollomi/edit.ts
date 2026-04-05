@@ -4,9 +4,9 @@
  */
 
 import * as path from 'node:path';
-import chalk from 'chalk';
-import { cli, Strategy } from '../../src/registry.js';
-import { CliError } from '../../src/errors.js';
+import { cli, Strategy } from '@jackwener/opencli/registry';
+import { CliError } from '@jackwener/opencli/errors';
+import { log } from '@jackwener/opencli/logger';
 import { YOLLOMI_DOMAIN, yollomiPost, downloadOutput, fmtBytes } from './utils.js';
 
 cli({
@@ -36,7 +36,7 @@ cli({
     }
 
     const apiPath = modelId === 'qwen-image-edit-plus' ? '/api/ai/qwen-image-edit-plus' : '/api/ai/qwen-image-edit';
-    process.stderr.write(chalk.dim(`Editing with ${modelId}...\n`));
+    log.status(`Editing with ${modelId}...`);
     const data = await yollomiPost(page, apiPath, body);
 
     const images: string[] = data.images || (data.image ? [data.image] : []);
@@ -49,7 +49,7 @@ cli({
     try {
       const filename = `yollomi_edit_${Date.now()}.png`;
       const { path: fp, size } = await downloadOutput(url, kwargs.output as string, filename);
-      if (credits !== undefined) process.stderr.write(chalk.dim(`Credits remaining: ${credits}\n`));
+      if (credits !== undefined) log.status(`Credits remaining: ${credits}`);
       return [{ status: 'saved', file: path.relative('.', fp), size: fmtBytes(size), credits: credits ?? '-', url }];
     } catch {
       return [{ status: 'download-failed', file: '-', size: '-', credits: credits ?? '-', url }];

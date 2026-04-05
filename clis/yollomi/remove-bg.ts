@@ -3,9 +3,9 @@
  */
 
 import * as path from 'node:path';
-import chalk from 'chalk';
-import { cli, Strategy } from '../../src/registry.js';
-import { CliError } from '../../src/errors.js';
+import { cli, Strategy } from '@jackwener/opencli/registry';
+import { CliError } from '@jackwener/opencli/errors';
+import { log } from '@jackwener/opencli/logger';
 import { YOLLOMI_DOMAIN, yollomiPost, downloadOutput, fmtBytes } from './utils.js';
 
 cli({
@@ -21,7 +21,7 @@ cli({
   ],
   columns: ['status', 'file', 'size', 'url'],
   func: async (page, kwargs) => {
-    process.stderr.write(chalk.dim('Removing background...\n'));
+    log.status('Removing background...');
     const data = await yollomiPost(page, '/api/ai/remove-bg', { imageUrl: kwargs.image as string });
 
     const url = data.image || (data.images?.[0]);

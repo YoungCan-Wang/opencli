@@ -3,9 +3,9 @@
  */
 
 import * as path from 'node:path';
-import chalk from 'chalk';
-import { cli, Strategy } from '../../src/registry.js';
-import { CliError } from '../../src/errors.js';
+import { cli, Strategy } from '@jackwener/opencli/registry';
+import { CliError } from '@jackwener/opencli/errors';
+import { log } from '@jackwener/opencli/logger';
 import { YOLLOMI_DOMAIN, yollomiPost, downloadOutput, fmtBytes } from './utils.js';
 
 cli({
@@ -25,7 +25,7 @@ cli({
     const imageUrl = kwargs.image as string;
     const prompt = kwargs.prompt as string;
 
-    process.stderr.write(chalk.dim('Generating background...\n'));
+    log.status('Generating background...');
     const data = await yollomiPost(page, '/api/ai/ai-background-generator', {
       images: [imageUrl],
       prompt: prompt || undefined,
