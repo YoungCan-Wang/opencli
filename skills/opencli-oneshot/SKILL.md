@@ -85,7 +85,7 @@ fetch(url, {credentials:'include'})？ → Tier 2: cookie   (YAML)
 ### YAML — Cookie/Public（最简）
 
 ```yaml
-# src/clis/<site>/<name>.yaml
+# clis/<site>/<name>.yaml
 site: mysite
 name: mycommand
 description: "一句话描述"
@@ -123,8 +123,8 @@ columns: [rank, title, value]
 ### TS — Intercept（抓包模式）
 
 ```typescript
-// src/clis/<site>/<name>.ts
-import { cli, Strategy } from '../../registry.js';
+// clis/<site>/<name>.ts
+import { cli, Strategy } from '../../src/registry.js';
 
 cli({
   site: 'mysite',
@@ -170,7 +170,7 @@ cli({
 ### TS — Header（如 Twitter GraphQL）
 
 ```typescript
-import { cli, Strategy } from '../../registry.js';
+import { cli, Strategy } from '../../src/registry.js';
 
 cli({
   site: 'twitter',

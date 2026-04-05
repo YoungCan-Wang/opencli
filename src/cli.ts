@@ -5,6 +5,9 @@
  * Dynamic adapter commands are registered via commanderAdapter.ts.
  */
 
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { type CliCommand, fullName, getRegistry, strategyLabel } from './registry.js';
@@ -17,6 +20,8 @@ import { loadExternalClis, executeExternalCli, installExternalCli, registerExter
 import { registerAllCommands } from './commanderAdapter.js';
 import { EXIT_CODES, getErrorMessage } from './errors.js';
 import { daemonStatus, daemonStop, daemonRestart } from './commands/daemon.js';
+
+const CLI_FILE = fileURLToPath(import.meta.url);
 
 /** Create a browser page for operate commands. Uses 'operate' workspace for session persistence. */
 async function getOperatePage(): Promise<import('./types.js').IPage> {
@@ -623,12 +628,9 @@ cli({
           return;
         }
 
-        const { execSync } = await import('node:child_process');
+        const { execFileSync } = await import('node:child_process');
         const os = await import('node:os');
-        const path = await import('node:path');
         const filePath = path.join(os.homedir(), '.opencli', 'clis', site, `${command}.ts`);
-
-        const fs = await import('node:fs');
         if (!fs.existsSync(filePath)) {
           console.error(`Adapter not found: ${filePath}`);
           console.error(`Run "opencli operate init ${name}" to create it.`);
@@ -643,15 +645,17 @@ cli({
         const adapterSrc = fs.readFileSync(filePath, 'utf-8');
         const hasLimitArg = /['"]limit['"]/.test(adapterSrc);
         const limitFlag = hasLimitArg ? ' --limit 3' : '';
-        const verifyCmd = `node dist/main.js ${site} ${command}${limitFlag}`;
+        const limitArgs = hasLimitArg ? ['--limit', '3'] : [];
+        const invocation = resolveOperateVerifyInvocation();
 
         try {
-          const output = execSync(verifyCmd, {
-            cwd: path.join(path.dirname(import.meta.url.replace('file://', '')), '..'),
+          const output = execFileSync(invocation.binary, [...invocation.args, site, command, ...limitArgs], {
+            cwd: invocation.cwd,
             timeout: 30000,
             encoding: 'utf-8',
             env: process.env,
             stdio: ['pipe', 'pipe', 'pipe'],
+            ...(invocation.shell ? { shell: true } : {}),
           });
           console.log(`  Executing: opencli ${site} ${command}${limitFlag}\n`);
           console.log(output);
@@ -972,7 +976,7 @@ cli({
     .description('Start Anthropic-compatible API proxy for Antigravity')
     .option('--port <port>', 'Server port (default: 8082)', '8082')
     .action(async (opts) => {
-      const { startServe } = await import('./clis/antigravity/serve.js');
+      const { startServe } = await import('../clis/antigravity/serve.js');
       await startServe({ port: parseInt(opts.port) });
     });
 
@@ -1004,6 +1008,100 @@ export function runCli(BUILTIN_CLIS: string, USER_CLIS: string): void {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
+
+export interface OperateVerifyInvocation {
+  binary: string;
+  args: string[];
+  cwd: string;
+  shell?: boolean;
+}
+
+export function findPackageRoot(startFile: string, fileExists: (path: string) => boolean = fs.existsSync): string {
+  let dir = path.dirname(startFile);
+
+  while (true) {
+    if (fileExists(path.join(dir, 'package.json'))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) {
+      throw new Error(`Could not find package.json above ${startFile}`);
+    }
+    dir = parent;
+  }
+}
+
+function getBuiltEntryCandidates(packageRoot: string, readFile: (path: string) => string): string[] {
+  const candidates: string[] = [];
+  try {
+    const pkg = JSON.parse(readFile(path.join(packageRoot, 'package.json'))) as {
+      bin?: string | Record<string, string>;
+      main?: string;
+    };
+
+    if (typeof pkg.bin === 'string') {
+      candidates.push(path.join(packageRoot, pkg.bin));
+    } else if (pkg.bin && typeof pkg.bin === 'object' && typeof pkg.bin.opencli === 'string') {
+      candidates.push(path.join(packageRoot, pkg.bin.opencli));
+    }
+
+    if (typeof pkg.main === 'string') {
+      candidates.push(path.join(packageRoot, pkg.main));
+    }
+  } catch {
+    // Fall through to compatibility candidates below.
+  }
+
+  // Compatibility fallback for partially-built trees or older layouts.
+  candidates.push(
+    path.join(packageRoot, 'dist', 'src', 'main.js'),
+    path.join(packageRoot, 'dist', 'main.js'),
+  );
+
+  return [...new Set(candidates)];
+}
+
+export function resolveOperateVerifyInvocation(opts: {
+  projectRoot?: string;
+  platform?: NodeJS.Platform;
+  fileExists?: (path: string) => boolean;
+  readFile?: (path: string) => string;
+} = {}): OperateVerifyInvocation {
+  const platform = opts.platform ?? process.platform;
+  const fileExists = opts.fileExists ?? fs.existsSync;
+  const readFile = opts.readFile ?? ((filePath: string) => fs.readFileSync(filePath, 'utf-8'));
+  const projectRoot = opts.projectRoot ?? findPackageRoot(CLI_FILE, fileExists);
+
+  for (const builtEntry of getBuiltEntryCandidates(projectRoot, readFile)) {
+    if (fileExists(builtEntry)) {
+      return {
+        binary: process.execPath,
+        args: [builtEntry],
+        cwd: projectRoot,
+      };
+    }
+  }
+
+  const sourceEntry = path.join(projectRoot, 'src', 'main.ts');
+  if (!fileExists(sourceEntry)) {
+    throw new Error(`Could not find opencli entrypoint under ${projectRoot}. Expected built entry from package.json or src/main.ts.`);
+  }
+
+  const localTsxBin = path.join(projectRoot, 'node_modules', '.bin', platform === 'win32' ? 'tsx.cmd' : 'tsx');
+  if (fileExists(localTsxBin)) {
+    return {
+      binary: localTsxBin,
+      args: [sourceEntry],
+      cwd: projectRoot,
+      ...(platform === 'win32' ? { shell: true } : {}),
+    };
+  }
+
+  return {
+    binary: platform === 'win32' ? 'npx.cmd' : 'npx',
+    args: ['tsx', sourceEntry],
+    cwd: projectRoot,
+    ...(platform === 'win32' ? { shell: true } : {}),
+  };
+}
 
 /** Infer a workspace-friendly hostname from a URL, with site override. */
 function inferHost(url: string, site?: string): string {

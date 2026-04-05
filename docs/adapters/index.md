@@ -9,7 +9,7 @@ Run `opencli list` for the live registry.
 | **[twitter](./browser/twitter)** | `trending` `bookmarks` `profile` `search` `timeline` `thread` `following` `followers` `notifications` `post` `reply` `delete` `like` `likes` `article` `follow` `unfollow` `bookmark` `unbookmark` `download` `accept` `reply-dm` `block` `unblock` `hide-reply` | 🔐 Browser |
 | **[reddit](./browser/reddit)** | `hot` `frontpage` `popular` `search` `subreddit` `read` `user` `user-posts` `user-comments` `upvote` `save` `comment` `subscribe` `saved` `upvoted` | 🔐 Browser |
 | **[tieba](./browser/tieba)** | `hot` `posts` `search` `read` | 🔐 Browser |
-| **[hupu](./browser/hupu)** | `hot` `search` `detail` `reply` `like` `unlike` | 🌐 / 🔐 |
+| **[hupu](./browser/hupu)** | `hot` `search` `detail` `mentions` `reply` `like` `unlike` | 🌐 / 🔐 |
 | **[bilibili](./browser/bilibili)** | `hot` `search` `me` `favorite` `history` `feed` `subtitle` `dynamic` `ranking` `following` `user-videos` `download` | 🔐 Browser |
 | **[zhihu](./browser/zhihu)** | `hot` `search` `question` `download` | 🔐 Browser |
 | **[xiaohongshu](./browser/xiaohongshu)** | `search` `notifications` `feed` `user` `note` `comments` `download` `publish` `creator-notes` `creator-note-detail` `creator-notes-summary` `creator-profile` `creator-stats` | 🔐 Browser |
@@ -31,9 +31,9 @@ Run `opencli list` for the live registry.
 | **[linux-do](./browser/linux-do)** | `hot` `latest` `feed` `search` `categories` `category` `tags` `topic` `user-posts` `user-topics` | 🔐 Browser |
 | **[chaoxing](./browser/chaoxing)** | `assignments` `exams` | 🔐 Browser |
 | **[grok](./browser/grok)** | `ask` | 🔐 Browser |
-| **[gemini](./browser/gemini)** | `new` `ask` `image` | 🔐 Browser |
+| **[gemini](./browser/gemini)** | `new` `ask` `image` `deep-research` `deep-research-result` | 🔐 Browser |
 | **[yuanbao](./browser/yuanbao)** | `new` `ask` | 🔐 Browser |
-| **[notebooklm](./browser/notebooklm)** | `status` `list` `open` `select` `current` `get` `metadata` `source-list` `source-get` `source-fulltext` `source-guide` `history` `note-list` `notes-list` `notes-get` `summary` | 🔐 Browser |
+| **[notebooklm](./browser/notebooklm)** | `status` `list` `open` `current` `get` `source-list` `source-get` `source-fulltext` `source-guide` `history` `note-list` `notes-get` `summary` | 🔐 Browser |
 | **[doubao](./browser/doubao)** | `status` `new` `send` `read` `ask` `history` `detail` `meeting-summary` `meeting-transcript` | 🔐 Browser |
 | **[weread](./browser/weread)** | `shelf` `search` `book` `ranking` `notebooks` `highlights` `notes` | 🔐 Browser |
 | **[douban](./browser/douban)** | `search` `top250` `subject` `photos` `download` `marks` `reviews` `movie-hot` `book-hot` | 🔐 Browser |
@@ -47,7 +47,7 @@ Run `opencli list` for the live registry.
 | **[tiktok](./browser/tiktok)** | `explore` `search` `profile` `user` `following` `follow` `unfollow` `like` `unlike` `comment` `save` `unsave` `live` `notifications` `friends` | 🔐 Browser |
 | **[google](./browser/google)** | `news` `search` `suggest` `trends` | 🌐 / 🔐 |
 | **[jd](./browser/jd)** | `item` | 🔐 Browser |
-| **[amazon](./browser/amazon)** | `bestsellers` `search` `product` `offer` `discussion` | 🔐 Browser |
+| **[amazon](./browser/amazon)** | `bestsellers` `search` `product` `offer` `discussion` `movers-shakers` `new-releases` | 🔐 Browser |
 | **[1688](./browser/1688)** | `search` `item` `store` | 🔐 Browser |
 | **[web](./browser/web)** | `read` | 🔐 Browser |
 | **[weixin](./browser/weixin)** | `download` | 🔐 Browser |
@@ -79,6 +79,7 @@ Run `opencli list` for the live registry.
 | **[spotify](./browser/spotify)** | `auth` `status` `play` `pause` `next` `prev` `volume` `search` `queue` `shuffle` `repeat` | 🔑 OAuth API |
 | **[stackoverflow](./browser/stackoverflow)** | `hot` `search` `bounties` `unanswered` | 🌐 Public |
 | **[wikipedia](./browser/wikipedia)** | `search` `summary` `random` `trending` | 🌐 Public |
+| **[lesswrong](./browser/lesswrong)** | `curated` `frontpage` `new` `top` `top-week` `top-month` `top-year` `read` `comments` `user` `user-posts` `tag` `tags` `sequences` `shortform` | 🌐 Public |
 | **[lobsters](./browser/lobsters)** | `hot` `newest` `active` `tag` | 🌐 Public |
 | **[steam](./browser/steam)** | `top-sellers` | 🌐 Public |
 

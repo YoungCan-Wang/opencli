@@ -1,7 +1,7 @@
 ---
 name: opencli-usage
-description: "Use when running OpenCLI commands to interact with websites (Bilibili, Twitter, Reddit, Xiaohongshu, etc.), desktop apps (Cursor, Notion), or public APIs (HackerNews, arXiv). Covers installation, command reference, and output formats for 73+ adapters."
-version: 1.6.1
+description: "Use when running OpenCLI commands to interact with websites (Bilibili, Twitter, Reddit, Xiaohongshu, etc.), desktop apps (Cursor, Notion), or public APIs (HackerNews, arXiv). Covers installation, command reference, and output formats for 79+ adapters."
+version: 1.6.3
 author: jackwener
 tags: [opencli, cli, browser, web, chrome-extension, cdp, bilibili, twitter, reddit, xiaohongshu, github, youtube, AI, agent, automation]
 ---
@@ -85,7 +85,7 @@ Usage: `opencli <site> <command> [args] [--limit N] [-f json|yaml|md|csv|table]`
 | **barchart** | `quote` `options` `greeks` `flow` |
 | **sinafinance** | `news` |
 | **reuters** | `search` |
-| **amazon** | `bestsellers` `search` `product` `offer` `discussion` |
+| **amazon** | `bestsellers` `search` `product` `offer` `discussion` `movers-shakers` `new-releases` |
 | **coupang** | `search` `add-to-cart` |
 | **jd** | `item` |
 | **smzdm** | `search` |
@@ -103,8 +103,8 @@ Usage: `opencli <site> <command> [args] [--limit N] [-f json|yaml|md|csv|table]`
 | **bloomberg** (browser) | `news` — full article reader |
 | **grok** | `ask` |
 | **doubao** | `status` `new` `send` `read` `ask` `detail` `history` `meeting-summary` `meeting-transcript` |
-| **gemini** | `ask` `new` `image` |
-| **notebooklm** | `status` `list` `open` `get` `current` `history` `summary` `note-list` `notes-get` `source-list` `source-get` `source-fulltext` `source-guide` |
+| **gemini** | `ask` `new` `image` `deep-research` `deep-research-result` |
+| **notebooklm** | `status` `list` `open` `current` `get` `history` `summary` `note-list` `notes-get` `source-list` `source-get` `source-fulltext` `source-guide` |
 
 ### Desktop (CDP/Electron)
 
@@ -141,7 +141,7 @@ Usage: `opencli <site> <command> [args] [--limit N] [-f json|yaml|md|csv|table]`
 | **wikipedia** | `search` `summary` `random` `trending` |
 | **producthunt** | `today` `hot` `browse` `posts` |
 | **imdb** | `top` `trending` `search` `title` `person` `reviews` |
-| **spotify** | `auth` `status` `play` |
+| **spotify** | `auth` `status` `play` `pause` `next` `prev` `volume` `search` `queue` `shuffle` `repeat` |
 | **paperreview** | `submit` `review` `feedback` |
 
 ### Management

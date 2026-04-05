@@ -36,7 +36,7 @@ Before you start:
 
 ### YAML Adapter (Recommended for data-fetching commands)
 
-Create a file like `src/clis/<site>/<command>.yaml`:
+Create a file like `clis/<site>/<command>.yaml`:
 
 ::: v-pre
 ```yaml
@@ -69,15 +69,15 @@ columns: [rank, title, score, url]
 ```
 :::
 
-See [`hackernews/top.yaml`](https://github.com/jackwener/opencli/blob/main/src/clis/hackernews/top.yaml) for a real example.
+See [`hackernews/top.yaml`](https://github.com/jackwener/opencli/blob/main/clis/hackernews/top.yaml) for a real example.
 
 ### TypeScript Adapter (For complex browser interactions)
 
-Create a file like `src/clis/<site>/<command>.ts`:
+Create a file like `clis/<site>/<command>.ts`:
 
 ```typescript
-import { cli, Strategy } from '../../registry.js';
-import { CommandExecutionError, EmptyResultError } from '../../errors.js';
+import { cli, Strategy } from '../../src/registry.js';
+import { CommandExecutionError, EmptyResultError } from '../../src/errors.js';
 
 cli({
   site: 'mysite',
