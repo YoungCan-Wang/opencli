@@ -98,7 +98,7 @@ export class Page extends BasePage {
     return this._tabId;
   }
 
-  async evaluate(js: string): Promise<any> {
+  async evaluate(js: string): Promise<unknown> {
     const code = wrapForEval(js);
     try {
       return await sendCommand('exec', { code, ...this._cmdOpts() });
