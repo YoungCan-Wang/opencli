@@ -4118,6 +4118,12 @@
         "default": false,
         "required": false,
         "help": "Enable web search"
+      },
+      {
+        "name": "file",
+        "type": "str",
+        "required": false,
+        "help": "Attach a file (PDF, image, text) with the prompt"
       }
     ],
     "columns": [
