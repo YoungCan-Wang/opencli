@@ -5,6 +5,7 @@ export const categoriesCommand = cli({
   site: 'macro',
   name: 'categories',
   description: '列出宏观经济一手信息源分组',
+  access: 'read',
   strategy: Strategy.PUBLIC,
   browser: false,
   args: [],

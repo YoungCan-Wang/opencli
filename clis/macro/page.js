@@ -12,6 +12,7 @@ export const pageCommand = cli({
   name: 'page',
   aliases: ['read', 'webpage'],
   description: '抓取宏观信息源网页有效内容，支持按时间过滤',
+  access: 'read',
   strategy: Strategy.PUBLIC,
   browser: false,
   timeoutSeconds: 180,

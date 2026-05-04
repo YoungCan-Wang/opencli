@@ -5,6 +5,7 @@ export const overviewCommand = cli({
   site: 'macro',
   name: 'overview',
   description: '查看宏观经济一手信息源上篇提纲',
+  access: 'read',
   strategy: Strategy.PUBLIC,
   browser: false,
   args: [],

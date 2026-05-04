@@ -7,6 +7,7 @@ export const articleCommand = cli({
   name: 'article',
   aliases: ['body', 'text'],
   description: '阅读《宏观经济一手信息源大全（上）》正文',
+  access: 'read',
   strategy: Strategy.PUBLIC,
   browser: false,
   args: [

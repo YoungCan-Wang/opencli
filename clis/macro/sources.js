@@ -5,6 +5,7 @@ export const sourcesCommand = cli({
   site: 'macro',
   name: 'sources',
   description: '列出宏观经济一手信息源（来自《宏观经济一手信息源大全（上）》）',
+  access: 'read',
   strategy: Strategy.PUBLIC,
   browser: false,
   args: [

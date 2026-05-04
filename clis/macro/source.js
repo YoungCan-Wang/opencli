@@ -6,6 +6,7 @@ export const sourceCommand = cli({
   site: 'macro',
   name: 'source',
   description: '查看某个宏观经济一手信息源详情',
+  access: 'read',
   strategy: Strategy.PUBLIC,
   browser: false,
   args: [

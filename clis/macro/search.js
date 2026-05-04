@@ -5,6 +5,7 @@ export const searchCommand = cli({
   site: 'macro',
   name: 'search',
   description: '搜索宏观经济一手信息源',
+  access: 'read',
   strategy: Strategy.PUBLIC,
   browser: false,
   args: [

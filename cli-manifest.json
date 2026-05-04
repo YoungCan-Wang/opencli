@@ -11929,6 +11929,7 @@
       "text"
     ],
     "description": "阅读《宏观经济一手信息源大全（上）》正文",
+    "access": "read",
     "strategy": "public",
     "browser": false,
     "args": [
@@ -11951,6 +11952,7 @@
     "site": "macro",
     "name": "categories",
     "description": "列出宏观经济一手信息源分组",
+    "access": "read",
     "strategy": "public",
     "browser": false,
     "args": [],
@@ -11969,6 +11971,7 @@
     "site": "macro",
     "name": "overview",
     "description": "查看宏观经济一手信息源上篇提纲",
+    "access": "read",
     "strategy": "public",
     "browser": false,
     "args": [],
@@ -11991,6 +11994,7 @@
       "webpage"
     ],
     "description": "抓取宏观信息源网页有效内容，支持按时间过滤",
+    "access": "read",
     "strategy": "public",
     "browser": false,
     "args": [
@@ -12081,6 +12085,7 @@
     "site": "macro",
     "name": "search",
     "description": "搜索宏观经济一手信息源",
+    "access": "read",
     "strategy": "public",
     "browser": false,
     "args": [
@@ -12122,6 +12127,7 @@
     "site": "macro",
     "name": "source",
     "description": "查看某个宏观经济一手信息源详情",
+    "access": "read",
     "strategy": "public",
     "browser": false,
     "args": [
@@ -12145,6 +12151,7 @@
     "site": "macro",
     "name": "sources",
     "description": "列出宏观经济一手信息源（来自《宏观经济一手信息源大全（上）》）",
+    "access": "read",
     "strategy": "public",
     "browser": false,
     "args": [
