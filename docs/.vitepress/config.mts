@@ -108,6 +108,7 @@ export default defineConfig({
                 { text: 'Eastmoney', link: '/adapters/browser/eastmoney' },
                 { text: 'TDX', link: '/adapters/browser/tdx' },
                 { text: 'THS', link: '/adapters/browser/ths' },
+                { text: 'Dianping', link: '/adapters/browser/dianping' },
               ],
             },
             {

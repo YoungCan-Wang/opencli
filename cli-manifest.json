@@ -5124,6 +5124,81 @@
     "sourceFile": "devto/user.js"
   },
   {
+    "site": "dianping",
+    "name": "search",
+    "description": "大众点评店铺搜索（按关键词 + 城市）",
+    "access": "read",
+    "domain": "www.dianping.com",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      {
+        "name": "keyword",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "搜索关键词，例如 \"火锅\""
+      },
+      {
+        "name": "city",
+        "type": "str",
+        "required": false,
+        "help": "城市名（北京/上海/beijing/...）或 cityId 数字。不传则使用 cookie 默认城市"
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 15,
+        "required": false,
+        "help": "返回的店铺数量（最多 15，dianping 单页固定 15 条）"
+      }
+    ],
+    "columns": [
+      "rank",
+      "shop_id",
+      "name",
+      "rating",
+      "reviews",
+      "price",
+      "cuisine",
+      "district",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "dianping/search.js",
+    "sourceFile": "dianping/search.js",
+    "navigateBefore": "https://www.dianping.com"
+  },
+  {
+    "site": "dianping",
+    "name": "shop",
+    "aliases": [
+      "detail"
+    ],
+    "description": "大众点评店铺详情（按 shop_id）",
+    "access": "read",
+    "domain": "www.dianping.com",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      {
+        "name": "shop_id",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "店铺 ID（来自 search 的 shop_id 列，或 https://www.dianping.com/shop/<id> URL 段）"
+      }
+    ],
+    "columns": [
+      "field",
+      "value"
+    ],
+    "type": "js",
+    "modulePath": "dianping/shop.js",
+    "sourceFile": "dianping/shop.js",
+    "navigateBefore": "https://www.dianping.com"
+  },
+  {
     "site": "dictionary",
     "name": "examples",
     "description": "Read real-world example sentences utilizing the word",

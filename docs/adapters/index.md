@@ -80,6 +80,7 @@ Run `opencli list` for the live registry.
 | **[eastmoney](./browser/eastmoney.md)**     | `hot-rank`                                                                                                                                                                                                                                                        | 🔐 Browser                          |
 | **[tdx](./browser/tdx.md)**                 | `hot-rank`                                                                                                                                                                                                                                                        | 🔐 Browser                          |
 | **[ths](./browser/ths.md)**                 | `hot-rank`                                                                                                                                                                                                                                                        | 🔐 Browser                          |
+| **[dianping](./browser/dianping.md)**       | `search` `shop`                                                                                                                                                                                                                                                   | 🔐 Browser                          |
 
 ## Public API Adapters
 

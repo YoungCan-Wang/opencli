@@ -68,7 +68,7 @@ const DETAIL_NAMES = new Set([
     'read', 'article', 'paper', 'post', 'detail', 'view', 'job',
     'page', 'book', 'movie', 'show-detail', 'chapter', 'tweet',
     'video', 'track', 'note', 'review', 'item', 'product', 'episode',
-    'thread', 'comment-detail', 'profile-detail',
+    'thread', 'comment-detail', 'profile-detail', 'shop',
 ]);
 
 /**
