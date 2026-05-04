@@ -1,10 +1,11 @@
 import { cli, Strategy } from '@jackwener/opencli/registry';
 import { flattenCodexProjects, readCodexProjects } from './sidebar.js';
-export const historyCommand = cli({
+
+export const projectsCommand = cli({
     site: 'codex',
-    name: 'history',
+    name: 'projects',
     access: 'read',
-    description: 'List visible Codex conversation threads grouped by project',
+    description: 'List Codex projects and visible conversations from the sidebar',
     domain: 'localhost',
     strategy: Strategy.UI,
     browser: true,
@@ -17,7 +18,7 @@ export const historyCommand = cli({
         const projects = await readCodexProjects(page);
         const rows = flattenCodexProjects(projects, kwargs);
         if (rows.length === 0) {
-            return [{ Project: kwargs.project || '', Index: 0, Title: 'No Codex threads found. Try opening the sidebar first.', Updated: '', Active: '' }];
+            return [{ Project: kwargs.project || '', Index: 0, Title: 'No Codex projects found', Updated: '', Active: '' }];
         }
         return rows;
     },

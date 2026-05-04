@@ -238,7 +238,7 @@ npm link
 | **hupu** | `hot` `search` `detail` `mentions` `reply` `like` `unlike` | 浏览器 |
 | **cursor** | `status` `send` `read` `new` `dump` `composer` `model` `extract-code` `ask` `screenshot` `history` `export` | 桌面端 |
 | **bilibili** | `hot` `search` `me` `favorite` `history` `feed` `subtitle` `video` `comments` `dynamic` `ranking` `following` `user-videos` `download` | 浏览器 |
-| **codex** | `status` `send` `read` `new` `dump` `extract-diff` `model` `ask` `screenshot` `history` `export` | 桌面端 |
+| **codex** | `status` `send` `read` `new` `dump` `extract-diff` `model` `ask` `screenshot` `projects` `history` `export` | 桌面端 |
 | **chatwise** | `status` `new` `send` `read` `ask` `model` `history` `export` `screenshot` | 桌面端 |
 | **doubao** | `status` `new` `send` `read` `ask` `history` `detail` `meeting-summary` `meeting-transcript` | 浏览器 |
 | **doubao-app** | `status` `new` `send` `read` `ask` `screenshot` `dump` | 桌面端 |
