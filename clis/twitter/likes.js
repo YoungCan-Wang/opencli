@@ -146,7 +146,7 @@ cli({
         { name: 'username', type: 'string', positional: true, help: 'Twitter screen name (without @). Defaults to logged-in user.' },
         { name: 'limit', type: 'int', default: 20 },
     ],
-    columns: ['author', 'name', 'text', 'likes', 'url', 'has_media', 'media_urls'],
+    columns: ['id', 'author', 'name', 'text', 'likes', 'retweets', 'created_at', 'url', 'has_media', 'media_urls'],
     func: async (page, kwargs) => {
         const limit = kwargs.limit || 20;
         let username = (kwargs.username || '').replace(/^@/, '');

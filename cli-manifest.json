@@ -17349,11 +17349,13 @@
       }
     ],
     "columns": [
+      "id",
       "author",
       "text",
       "likes",
       "retweets",
       "bookmarks",
+      "created_at",
       "url"
     ],
     "type": "js",
@@ -17608,10 +17610,13 @@
       }
     ],
     "columns": [
+      "id",
       "author",
       "name",
       "text",
       "likes",
+      "retweets",
+      "created_at",
       "url",
       "has_media",
       "media_urls"
@@ -18135,6 +18140,7 @@
       }
     ],
     "columns": [
+      "id",
       "author",
       "created_at",
       "is_retweet",
