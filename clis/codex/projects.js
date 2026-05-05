@@ -1,11 +1,12 @@
 import { cli, Strategy } from '@jackwener/opencli/registry';
 import { EmptyResultError } from '@jackwener/opencli/errors';
 import { flattenCodexProjects, readCodexProjects } from './sidebar.js';
-export const historyCommand = cli({
+
+export const projectsCommand = cli({
     site: 'codex',
-    name: 'history',
+    name: 'projects',
     access: 'read',
-    description: 'List visible Codex conversation threads grouped by project',
+    description: 'List Codex projects and visible conversations from the sidebar',
     domain: 'localhost',
     strategy: Strategy.UI,
     browser: true,
@@ -18,9 +19,9 @@ export const historyCommand = cli({
         const projects = await readCodexProjects(page);
         const rows = flattenCodexProjects(projects, kwargs);
         if (rows.length === 0) {
-            throw new EmptyResultError('codex history', kwargs.project
-                ? `No Codex conversations were visible for project "${kwargs.project}".`
-                : 'No Codex conversations were visible. Open the Codex sidebar and retry.');
+            throw new EmptyResultError('codex projects', kwargs.project
+                ? `No Codex projects matched "${kwargs.project}".`
+                : 'No Codex projects were visible. Open the Codex sidebar and retry.');
         }
         return rows;
     },
