@@ -1,3 +1,5 @@
+import { ArgumentError, CommandExecutionError, EmptyResultError } from '@jackwener/opencli/errors';
+
 function cleanText(value) {
     return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
@@ -22,6 +24,33 @@ function matchesProject(project, query) {
 
 export function hasConversationTarget(kwargs) {
     return !!(kwargs?.project || kwargs?.conversation || kwargs?.index || kwargs?.['thread-id']);
+}
+
+export function parsePositiveIntegerOption(raw, label) {
+    const value = cleanText(raw);
+    if (!/^\d+$/.test(value)) {
+        throw new ArgumentError(`${label} must be a positive integer`);
+    }
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isSafeInteger(parsed) || parsed < 1) {
+        throw new ArgumentError(`${label} must be a positive integer`);
+    }
+    return parsed;
+}
+
+export function parseOptionalPositiveIntegerOption(raw, label) {
+    if (raw == null || cleanText(raw) === '') {
+        return null;
+    }
+    return parsePositiveIntegerOption(raw, label);
+}
+
+export function requireNonEmptyOption(raw, label) {
+    const value = cleanText(raw);
+    if (!value) {
+        throw new ArgumentError(`${label} cannot be empty`);
+    }
+    return value;
 }
 
 export function collectCodexProjectsFromDocument(doc = document) {
@@ -199,7 +228,9 @@ export function selectCodexConversationInDocument(target, doc = document) {
     if (!threadRow) {
         return {
             ok: false,
-            error: target.conversation
+            error: target.threadId
+                ? `Thread not found: ${target.threadId}`
+                : target.conversation
                 ? `Conversation not found: ${target.conversation}`
                 : 'Pass --conversation, --thread-id, or --index to select a Codex conversation',
             conversations: threadRows.map((row, index) => ({ index: index + 1, title: threadTitle(row) })),
@@ -225,13 +256,13 @@ export function selectCodexConversationInDocument(target, doc = document) {
 
 export function flattenCodexProjects(projects, opts = {}) {
     const projectFilter = opts.project;
-    const limit = Number.parseInt(String(opts.limit ?? ''), 10);
+    const limit = parseOptionalPositiveIntegerOption(opts.limit, 'codex --limit');
     const rows = [];
     for (const project of projects) {
         if (!matchesProject(project, projectFilter)) {
             continue;
         }
-        const conversations = Number.isInteger(limit) && limit > 0
+        const conversations = limit
             ? project.conversations.slice(0, limit)
             : project.conversations;
         if (conversations.length === 0) {
@@ -263,17 +294,22 @@ export function flattenCodexProjects(projects, opts = {}) {
 
 export async function readCodexProjects(page) {
     const projects = await page.evaluate(`(${collectCodexProjectsFromDocument.toString()})()`);
-    return Array.isArray(projects) ? projects : [];
+    if (!Array.isArray(projects)) {
+        throw new CommandExecutionError('Codex sidebar project extraction returned an invalid payload');
+    }
+    return projects;
 }
 
 export async function openCodexConversation(page, kwargs) {
     if (!hasConversationTarget(kwargs))
         return null;
+    const index = parseOptionalPositiveIntegerOption(kwargs.index, 'codex conversation --index');
+    const threadId = kwargs['thread-id'] ? requireNonEmptyOption(kwargs['thread-id'], 'codex conversation --thread-id') : '';
     const target = {
         project: kwargs.project || '',
         conversation: kwargs.conversation || '',
-        index: kwargs.index || '',
-        threadId: kwargs['thread-id'] || '',
+        index: index == null ? '' : String(index),
+        threadId,
         preferNativeClick: typeof page.nativeClick === 'function',
     };
     let result = await page.evaluate(`(${selectCodexConversationInDocument.toString()})(${JSON.stringify(target)})`);
@@ -290,7 +326,20 @@ export async function openCodexConversation(page, kwargs) {
             : result?.projects
                 ? ` Available projects: ${result.projects.join(', ')}`
                 : '';
-        throw new Error(`${result?.error || 'Could not select Codex conversation'}${detail}`);
+        const message = `${result?.error || 'Could not select Codex conversation'}${detail}`;
+        if (result?.error?.startsWith('Invalid conversation index:')) {
+            throw new ArgumentError(message);
+        }
+        if (result?.error?.startsWith('Multiple conversations matched')) {
+            throw new ArgumentError(message, 'Pass --project or --thread-id to disambiguate the target conversation.');
+        }
+        if (result?.error?.startsWith('Project not found:')
+            || result?.error?.startsWith('Conversation not found:')
+            || result?.error?.startsWith('Thread not found:')
+            || result?.error?.startsWith('No visible conversations under project:')) {
+            throw new EmptyResultError('codex conversation', message);
+        }
+        throw new CommandExecutionError(message, 'Open the Codex sidebar and verify project/conversation rows are visible.');
     }
     if (typeof page.nativeClick === 'function' && Number.isFinite(result.x) && Number.isFinite(result.y)) {
         await page.nativeClick(result.x, result.y);

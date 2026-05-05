@@ -1,4 +1,5 @@
 import { cli, Strategy } from '@jackwener/opencli/registry';
+import { EmptyResultError } from '@jackwener/opencli/errors';
 import { flattenCodexProjects, readCodexProjects } from './sidebar.js';
 export const historyCommand = cli({
     site: 'codex',
@@ -17,7 +18,9 @@ export const historyCommand = cli({
         const projects = await readCodexProjects(page);
         const rows = flattenCodexProjects(projects, kwargs);
         if (rows.length === 0) {
-            return [{ Project: kwargs.project || '', Index: 0, Title: 'No Codex threads found. Try opening the sidebar first.', Updated: '', Active: '' }];
+            throw new EmptyResultError('codex history', kwargs.project
+                ? `No Codex conversations were visible for project "${kwargs.project}".`
+                : 'No Codex conversations were visible. Open the Codex sidebar and retry.');
         }
         return rows;
     },

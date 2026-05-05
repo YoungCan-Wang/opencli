@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { ArgumentError, CommandExecutionError, EmptyResultError } from '@jackwener/opencli/errors';
+import { askCommand } from './ask.js';
+import { historyCommand } from './history.js';
+import { projectsCommand } from './projects.js';
 import {
     collectCodexProjectsFromDocument,
     flattenCodexProjects,
+    openCodexConversation,
     selectCodexConversationInDocument,
 } from './sidebar.js';
 
@@ -167,6 +172,14 @@ describe('codex sidebar helpers', () => {
         ]);
     });
 
+    it('rejects invalid project/history limits instead of silently ignoring them', () => {
+        const projects = collectCodexProjectsFromDocument(fixtureDocument());
+
+        expect(() => flattenCodexProjects(projects, { limit: '0' })).toThrowError(ArgumentError);
+        expect(() => flattenCodexProjects(projects, { limit: '1.5' })).toThrowError(ArgumentError);
+        expect(() => flattenCodexProjects(projects, { limit: 'abc' })).toThrowError(ArgumentError);
+    });
+
     it('does not match nested project paths when filtering by a parent label', () => {
         const projects = collectCodexProjectsFromDocument(fixtureDocument());
         projects.push({
@@ -240,5 +253,77 @@ describe('codex sidebar helpers', () => {
             conversation: '统一 opencli 二级命令分组',
             threadId: 'local:opencli-groups',
         });
+    });
+
+    it('reports exact thread-id misses as not found', () => {
+        const result = selectCodexConversationInDocument({
+            project: 'stock',
+            threadId: 'local:missing',
+        }, fixtureDocument());
+
+        expect(result).toMatchObject({
+            ok: false,
+            error: 'Thread not found: local:missing',
+        });
+    });
+
+    it('maps project/conversation misses to EmptyResultError in command selection', async () => {
+        const page = {
+            evaluate: async () => selectCodexConversationInDocument({ project: 'missing' }, fixtureDocument()),
+        };
+
+        await expect(openCodexConversation(page, { project: 'missing' })).rejects.toBeInstanceOf(EmptyResultError);
+    });
+
+    it('maps missing sidebar DOM to CommandExecutionError instead of empty success', async () => {
+        const page = {
+            evaluate: async () => selectCodexConversationInDocument({ conversation: 'anything' }, el('document', {}, [])),
+        };
+
+        await expect(openCodexConversation(page, { conversation: 'anything' })).rejects.toBeInstanceOf(CommandExecutionError);
+    });
+
+    it('maps ambiguous conversation selection to ArgumentError', async () => {
+        const duplicateDoc = el('document', {}, [
+            project('alpha', '/tmp/alpha', [
+                thread({ threadId: 'local:one' }, 'Shared title', '1 小时'),
+            ]),
+            project('beta', '/tmp/beta', [
+                thread({ threadId: 'local:two' }, 'Shared title', '2 小时'),
+            ]),
+        ]);
+        const page = {
+            evaluate: async () => selectCodexConversationInDocument({ conversation: 'Shared title' }, duplicateDoc),
+        };
+
+        await expect(openCodexConversation(page, { conversation: 'Shared title' })).rejects.toBeInstanceOf(ArgumentError);
+    });
+});
+
+describe('codex sidebar commands', () => {
+    it('projects fails empty result instead of returning a sentinel row', async () => {
+        const page = {
+            evaluate: async () => [],
+        };
+
+        await expect(projectsCommand.func(page, {})).rejects.toBeInstanceOf(EmptyResultError);
+    });
+
+    it('history fails empty result instead of returning a sentinel row', async () => {
+        const page = {
+            evaluate: async () => [],
+        };
+
+        await expect(historyCommand.func(page, {})).rejects.toBeInstanceOf(EmptyResultError);
+    });
+
+    it('ask rejects invalid timeout instead of falling back to the default', async () => {
+        const page = {
+            evaluate: async () => 0,
+        };
+
+        await expect(askCommand.func(page, { text: 'hello', timeout: 'bogus' })).rejects.toBeInstanceOf(ArgumentError);
+        await expect(askCommand.func(page, { text: 'hello', timeout: '0' })).rejects.toBeInstanceOf(ArgumentError);
+        await expect(askCommand.func(page, { text: 'hello', timeout: '1.5' })).rejects.toBeInstanceOf(ArgumentError);
     });
 });

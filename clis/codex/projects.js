@@ -1,4 +1,5 @@
 import { cli, Strategy } from '@jackwener/opencli/registry';
+import { EmptyResultError } from '@jackwener/opencli/errors';
 import { flattenCodexProjects, readCodexProjects } from './sidebar.js';
 
 export const projectsCommand = cli({
@@ -18,7 +19,9 @@ export const projectsCommand = cli({
         const projects = await readCodexProjects(page);
         const rows = flattenCodexProjects(projects, kwargs);
         if (rows.length === 0) {
-            return [{ Project: kwargs.project || '', Index: 0, Title: 'No Codex projects found', Updated: '', Active: '' }];
+            throw new EmptyResultError('codex projects', kwargs.project
+                ? `No Codex projects matched "${kwargs.project}".`
+                : 'No Codex projects were visible. Open the Codex sidebar and retry.');
         }
         return rows;
     },

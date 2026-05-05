@@ -1,6 +1,6 @@
 import { cli, Strategy } from '@jackwener/opencli/registry';
 import { selectorError } from '@jackwener/opencli/errors';
-import { conversationSelectionArgs, openCodexConversation } from './sidebar.js';
+import { conversationSelectionArgs, openCodexConversation, parsePositiveIntegerOption } from './sidebar.js';
 export const askCommand = cli({
     site: 'codex',
     name: 'ask',
@@ -17,7 +17,7 @@ export const askCommand = cli({
     columns: ['Role', 'Project', 'Conversation', 'Text'],
     func: async (page, kwargs) => {
         const text = kwargs.text;
-        const timeout = parseInt(kwargs.timeout, 10) || 60;
+        const timeout = parsePositiveIntegerOption(kwargs.timeout ?? '60', 'codex ask --timeout');
         const selected = await openCodexConversation(page, kwargs);
         // Snapshot the current content length before sending
         const beforeLen = await page.evaluate(`
