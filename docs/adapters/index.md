@@ -96,20 +96,26 @@ Run `opencli list` for the live registry.
 | **[xiaoyuzhou](./browser/xiaoyuzhou.md)**         | `podcast` `podcast-episodes` `episode` `download` `transcript` (local credentials required)                                                   | 🔑 Local API |
 | **[yahoo-finance](./browser/yahoo-finance.md)**   | `quote`                                                                                                                                        | 🌐 Public    |
 | **[arxiv](./browser/arxiv.md)**                   | `search` `paper`                                                                                                                               | 🌐 Public    |
-| **[dblp](./browser/dblp.md)**                     | `search` `paper`                                                                                                                               | 🌐 Public    |
+| **[dblp](./browser/dblp.md)**                     | `search` `author` `paper` `venue`                                                                                                              | 🌐 Public    |
 | **[pubmed](./browser/pubmed.md)**                 | `search` `article` `author` `citations` `related`                                                                                              | 🌐 Public    |
 | **[openreview](./browser/openreview.md)**         | `search` `venue` `paper` `reviews`                                                                                                             | 🌐 Public    |
 | **[paperreview](./browser/paperreview.md)**       | `submit` `review` `feedback`                                                                                                                   | 🌐 Public    |
 | **[barchart](./browser/barchart.md)**             | `quote` `options` `greeks` `flow`                                                                                                              | 🌐 Public    |
 | **[binance](./browser/binance.md)**               | `price` `prices` `ticker` `pairs` `trades` `depth` `asks` `klines` `top` `gainers` `losers`                                                 | 🌐 Public    |
-| **[hf](./browser/hf.md)**                         | `top`                                                                                                                                          | 🌐 Public    |
+| **[hf](./browser/hf.md)**                         | `top` `paper` `models` `datasets` `spaces`                                                                                                     | 🌐 Public    |
 | **[sinafinance](./browser/sinafinance.md)**       | `news` `rolling-news` `stock` `stock-rank`                                                                                                     | 🌐 / 🔐      |
 | **[spotify](./browser/spotify.md)**               | `auth` `status` `play` `pause` `next` `prev` `volume` `search` `queue` `shuffle` `repeat`                                                      | 🔑 OAuth API |
-| **[stackoverflow](./browser/stackoverflow.md)**   | `hot` `search` `bounties` `unanswered`                                                                                                         | 🌐 Public    |
+| **[stackoverflow](./browser/stackoverflow.md)**   | `hot` `search` `bounties` `unanswered` `tag` `user` `read` `related`                                                                           | 🌐 Public    |
 | **[wikipedia](./browser/wikipedia.md)**           | `search` `summary` `random` `trending`                                                                                                         | 🌐 Public    |
 | **[lesswrong](./browser/lesswrong.md)**           | `curated` `frontpage` `new` `top` `top-week` `top-month` `top-year` `read` `comments` `user` `user-posts` `tag` `tags` `sequences` `shortform` | 🌐 Public    |
 | **[lobsters](./browser/lobsters.md)**             | `hot` `newest` `active` `tag` `read`                                                                                                           | 🌐 Public    |
 | **[steam](./browser/steam.md)**                   | `top-sellers`                                                                                                                                  | 🌐 Public    |
+| **[coingecko](./browser/coingecko.md)**           | `top` `coin` `trending` `exchanges` `categories` `derivatives` `global`                                                                        | 🌐 Public    |
+| **[npm](./browser/npm.md)**                       | `search` `package` `downloads`                                                                                                                 | 🌐 Public    |
+| **[pypi](./browser/pypi.md)**                     | `package` `downloads`                                                                                                                          | 🌐 Public    |
+| **[crates](./browser/crates.md)**                 | `search` `crate`                                                                                                                               | 🌐 Public    |
+| **[mdn](./browser/mdn.md)**                       | `search`                                                                                                                                       | 🌐 Public    |
+| **[nvd](./browser/nvd.md)**                       | `cve`                                                                                                                                          | 🌐 Public    |
 
 ## Desktop Adapters
 

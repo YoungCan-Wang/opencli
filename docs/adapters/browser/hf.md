@@ -10,6 +10,7 @@
 | `opencli hf paper <arxivId>` | Single paper detail (title / authors / summary / AI keywords / upvotes) |
 | `opencli hf models` | Top Hugging Face models (downloads / likes / trending / freshness) |
 | `opencli hf datasets` | Top Hugging Face datasets |
+| `opencli hf spaces` | Top Hugging Face Spaces (gradio / streamlit / docker / static demos) |
 
 ## Usage Examples
 
@@ -39,6 +40,12 @@ opencli hf models --pipeline text-generation --search llama --sort likes --limit
 
 # Top datasets by likes
 opencli hf datasets --sort likes --limit 10
+
+# Top Spaces by likes
+opencli hf spaces --limit 20
+
+# Filter Spaces by SDK
+opencli hf spaces --sdk gradio --search llm --limit 10
 
 # JSON output
 opencli hf top -f json
@@ -79,6 +86,17 @@ Returns one row with `id, title, authors, publishedAt, upvotes, aiKeywords, summ
 | `--sort` | Same set as `models` (default: `downloads`) |
 | `--search` | Optional name/owner substring filter |
 | `--limit` | Max datasets (1–100, default: 20) |
+
+### `spaces` Options
+
+| Option | Description |
+|--------|-------------|
+| `--sort` | `likes` / `created_at` / `last_modified` (default: `likes`; HF doesn't accept `trending` for spaces) |
+| `--search` | Optional name/owner substring filter (e.g. `stability`, `openai/`) |
+| `--sdk` | SDK filter: `gradio` / `streamlit` / `docker` / `static` |
+| `--limit` | Max spaces (1–100, default: 20) |
+
+Returns rows with `rank, id, author, sdk, likes, tags, lastModified, url`.
 
 ## Prerequisites
 

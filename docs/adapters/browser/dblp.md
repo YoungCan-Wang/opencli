@@ -11,6 +11,7 @@
 | `opencli dblp search <query>` | Free-text search across titles, authors, and venues |
 | `opencli dblp author <name>` | List one author's recent publications (newest first) by name or `--pid` |
 | `opencli dblp paper <key>` | Fetch a single record's full metadata by canonical dblp key |
+| `opencli dblp venue <query>` | Search dblp's venue (conference / journal) registry |
 
 ## Usage Examples
 
@@ -36,6 +37,12 @@ opencli dblp paper conf/nips/VaswaniSPUJGKP17
 # arXiv mirror records use the journals/corr/abs-* form
 opencli dblp paper journals/corr/abs-2509-05821
 
+# Resolve a venue acronym to dblp's canonical venue page
+opencli dblp venue ICLR --limit 5
+
+# Browse venues that match a topic keyword
+opencli dblp venue "neural networks" --limit 10
+
 # JSON output
 opencli dblp search "graph neural network" -f json
 ```
@@ -47,6 +54,7 @@ opencli dblp search "graph neural network" -f json
 | `search` | `rank, key, title, authors, venue, year, type, doi, url` |
 | `author` | `rank, key, title, authors, venue, year, type, doi, pid, url` |
 | `paper` | `key, type, title, authors, venue, year, pages, doi, open_access_url, dblp_url` |
+| `venue` | `rank, acronym, venue, type, url` |
 
 The `key` column from `search` and `author` round-trips into `paper` — it is dblp's canonical record identifier (e.g. `conf/nips/VaswaniSPUJGKP17`, `journals/corr/abs-2509-05821`, `phd/Smith20`).
 

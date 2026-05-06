@@ -5081,6 +5081,46 @@
   },
   {
     "site": "coingecko",
+    "name": "derivatives",
+    "description": "Top crypto derivative (perpetual / futures) markets by 24h volume",
+    "access": "read",
+    "domain": "api.coingecko.com",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 20,
+        "required": false,
+        "help": "Max rows to return (1-500; CoinGecko returns one large page)."
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "required": false,
+        "help": "Optional symbol substring filter (e.g. \"BTC\", \"ETHUSDT\")."
+      }
+    ],
+    "columns": [
+      "rank",
+      "market",
+      "symbol",
+      "indexId",
+      "contractType",
+      "price",
+      "change24hPct",
+      "fundingRate",
+      "openInterestUsd",
+      "volume24hUsd",
+      "expired"
+    ],
+    "type": "js",
+    "modulePath": "coingecko/derivatives.js",
+    "sourceFile": "coingecko/derivatives.js"
+  },
+  {
+    "site": "coingecko",
     "name": "exchanges",
     "description": "Top crypto exchanges by 24h BTC trading volume",
     "access": "read",
@@ -5298,6 +5338,83 @@
     "modulePath": "coupang/search.js",
     "sourceFile": "coupang/search.js",
     "navigateBefore": "https://www.coupang.com"
+  },
+  {
+    "site": "crates",
+    "name": "crate",
+    "description": "Single crates.io crate metadata (latest version, downloads, license, repo)",
+    "access": "read",
+    "domain": "crates.io",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "name",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "crates.io crate name (e.g. \"serde\", \"tokio\")"
+      }
+    ],
+    "columns": [
+      "name",
+      "latestVersion",
+      "description",
+      "downloads",
+      "recentDownloads",
+      "versions",
+      "license",
+      "homepage",
+      "documentation",
+      "repository",
+      "keywords",
+      "categories",
+      "created",
+      "updated",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "crates/crate.js",
+    "sourceFile": "crates/crate.js"
+  },
+  {
+    "site": "crates",
+    "name": "search",
+    "description": "Search the public crates.io registry by keyword",
+    "access": "read",
+    "domain": "crates.io",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "query",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "Search keyword (e.g. \"serde\", \"async runtime\")"
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 20,
+        "required": false,
+        "help": "Max results (1-100)"
+      }
+    ],
+    "columns": [
+      "rank",
+      "name",
+      "latestVersion",
+      "description",
+      "downloads",
+      "recentDownloads",
+      "repository",
+      "updated",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "crates/search.js",
+    "sourceFile": "crates/search.js"
   },
   {
     "site": "ctrip",
@@ -5645,6 +5762,41 @@
     "type": "js",
     "modulePath": "dblp/search.js",
     "sourceFile": "dblp/search.js"
+  },
+  {
+    "site": "dblp",
+    "name": "venue",
+    "description": "Search dblp venue registry (conferences / journals) by name or acronym",
+    "access": "read",
+    "domain": "dblp.org",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "query",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "Venue name or acronym (e.g. \"ICLR\", \"neural networks\")"
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 20,
+        "required": false,
+        "help": "Max venues (1-100, single dblp page)"
+      }
+    ],
+    "columns": [
+      "rank",
+      "acronym",
+      "venue",
+      "type",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "dblp/venue.js",
+    "sourceFile": "dblp/venue.js"
   },
   {
     "site": "deepseek",
@@ -9746,6 +9898,56 @@
   },
   {
     "site": "hf",
+    "name": "spaces",
+    "description": "Top Hugging Face Spaces (likes / created_at / last_modified).",
+    "access": "read",
+    "domain": "huggingface.co",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "sort",
+        "type": "string",
+        "default": "likes",
+        "required": false,
+        "help": "Sort key: likes, created_at, last_modified"
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "help": "Optional name/owner substring filter (e.g. \"stability\", \"openai/\")"
+      },
+      {
+        "name": "sdk",
+        "type": "string",
+        "required": false,
+        "help": "Filter by Space SDK: gradio / streamlit / docker / static"
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 20,
+        "required": false,
+        "help": "Max spaces (max 100; one API page)."
+      }
+    ],
+    "columns": [
+      "rank",
+      "id",
+      "author",
+      "sdk",
+      "likes",
+      "tags",
+      "lastModified",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "hf/spaces.js",
+    "sourceFile": "hf/spaces.js"
+  },
+  {
+    "site": "hf",
     "name": "top",
     "description": "Top upvoted Hugging Face papers",
     "access": "read",
@@ -13352,6 +13554,49 @@
     "navigateBefore": "https://maimai.cn"
   },
   {
+    "site": "mdn",
+    "name": "search",
+    "description": "Search MDN Web Docs by keyword",
+    "access": "read",
+    "domain": "developer.mozilla.org",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "query",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "Search keyword (e.g. \"fetch\", \"flexbox\", \"Array.prototype.map\")"
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 10,
+        "required": false,
+        "help": "Max results (1-50)"
+      },
+      {
+        "name": "locale",
+        "type": "str",
+        "default": "en-US",
+        "required": false,
+        "help": "Doc locale (en-US default; de / es / fr / ja / ko / pt-BR / ru / zh-CN / zh-TW)"
+      }
+    ],
+    "columns": [
+      "rank",
+      "title",
+      "slug",
+      "locale",
+      "summary",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "mdn/search.js",
+    "sourceFile": "mdn/search.js"
+  },
+  {
     "site": "medium",
     "name": "feed",
     "description": "Medium 热门文章 Feed",
@@ -14718,6 +14963,149 @@
     "sourceFile": "nowcoder/trending.js"
   },
   {
+    "site": "npm",
+    "name": "downloads",
+    "description": "Daily download counts for an npm package over a window",
+    "access": "read",
+    "domain": "api.npmjs.org",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "name",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "npm package name (e.g. \"react\", \"@vercel/og\")"
+      },
+      {
+        "name": "period",
+        "type": "str",
+        "default": "last-week",
+        "required": false,
+        "help": "last-day / last-week / last-month / last-year, or YYYY-MM-DD:YYYY-MM-DD"
+      }
+    ],
+    "columns": [
+      "rank",
+      "package",
+      "day",
+      "downloads"
+    ],
+    "type": "js",
+    "modulePath": "npm/downloads.js",
+    "sourceFile": "npm/downloads.js"
+  },
+  {
+    "site": "npm",
+    "name": "package",
+    "description": "Single npm package metadata (latest version, license, homepage, repository). Use `npm downloads` for stats.",
+    "access": "read",
+    "domain": "registry.npmjs.org",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "name",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "npm package name (e.g. \"react\", \"@vercel/og\")"
+      }
+    ],
+    "columns": [
+      "name",
+      "latestVersion",
+      "description",
+      "license",
+      "homepage",
+      "repository",
+      "bugs",
+      "maintainers",
+      "keywords",
+      "created",
+      "modified",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "npm/package.js",
+    "sourceFile": "npm/package.js"
+  },
+  {
+    "site": "npm",
+    "name": "search",
+    "description": "Search the public npm registry by keyword",
+    "access": "read",
+    "domain": "registry.npmjs.org",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "query",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "Search keyword (e.g. \"react\", \"graphql client\")"
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 20,
+        "required": false,
+        "help": "Max results (1-250)"
+      }
+    ],
+    "columns": [
+      "rank",
+      "name",
+      "version",
+      "description",
+      "weeklyDownloads",
+      "dependents",
+      "license",
+      "publisher",
+      "updated",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "npm/search.js",
+    "sourceFile": "npm/search.js"
+  },
+  {
+    "site": "nvd",
+    "name": "cve",
+    "description": "NIST NVD CVE detail (description, CVSS, CWE, KEV flag)",
+    "access": "read",
+    "domain": "services.nvd.nist.gov",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "id",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "CVE identifier (e.g. \"CVE-2021-44228\")"
+      }
+    ],
+    "columns": [
+      "id",
+      "published",
+      "lastModified",
+      "vulnStatus",
+      "baseScore",
+      "severity",
+      "attackVector",
+      "cwe",
+      "kevAdded",
+      "description",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "nvd/cve.js",
+    "sourceFile": "nvd/cve.js"
+  },
+  {
     "site": "ones",
     "name": "login",
     "description": "ONES Project API — login via Chrome Bridge (POST auth/login); stderr prints export hints for ONES_USER_ID / TOKEN",
@@ -16074,6 +16462,77 @@
     "type": "js",
     "modulePath": "pubmed/search.js",
     "sourceFile": "pubmed/search.js"
+  },
+  {
+    "site": "pypi",
+    "name": "downloads",
+    "description": "PyPI download stats for a package (recent totals or full daily history)",
+    "access": "read",
+    "domain": "pypistats.org",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "name",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "PyPI package name (e.g. \"requests\", \"pandas\")"
+      },
+      {
+        "name": "period",
+        "type": "str",
+        "default": "recent",
+        "required": false,
+        "help": "recent (default — 1 row, last day/week/month) or overall (1 row per day)"
+      }
+    ],
+    "columns": [
+      "rank",
+      "package",
+      "period",
+      "date",
+      "downloads"
+    ],
+    "type": "js",
+    "modulePath": "pypi/downloads.js",
+    "sourceFile": "pypi/downloads.js"
+  },
+  {
+    "site": "pypi",
+    "name": "package",
+    "description": "Single PyPI package metadata (latest version, license, homepage, classifiers)",
+    "access": "read",
+    "domain": "pypi.org",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "name",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "PyPI package name (e.g. \"requests\", \"pandas\")"
+      }
+    ],
+    "columns": [
+      "name",
+      "latestVersion",
+      "summary",
+      "author",
+      "license",
+      "homepage",
+      "repository",
+      "requiresPython",
+      "keywords",
+      "releases",
+      "firstReleased",
+      "lastReleased",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "pypi/package.js",
+    "sourceFile": "pypi/package.js"
   },
   {
     "site": "quark",
@@ -17847,6 +18306,55 @@
     "type": "js",
     "modulePath": "stackoverflow/read.js",
     "sourceFile": "stackoverflow/read.js"
+  },
+  {
+    "site": "stackoverflow",
+    "name": "related",
+    "description": "List Stack Overflow questions related to a given question id.",
+    "access": "read",
+    "domain": "stackoverflow.com",
+    "strategy": "public",
+    "browser": false,
+    "args": [
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "positional": true,
+        "help": "Stack Overflow question id (numeric, e.g. 79935770)."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "default": "rank",
+        "required": false,
+        "help": "Sort key: rank, activity, votes, creation (rank = SO relevance default)."
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 20,
+        "required": false,
+        "help": "Max related questions (1-100)."
+      }
+    ],
+    "columns": [
+      "rank",
+      "id",
+      "title",
+      "score",
+      "answers",
+      "views",
+      "isAnswered",
+      "tags",
+      "author",
+      "createdAt",
+      "lastActivityAt",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "stackoverflow/related.js",
+    "sourceFile": "stackoverflow/related.js"
   },
   {
     "site": "stackoverflow",

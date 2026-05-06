@@ -13,6 +13,7 @@
 | `opencli stackoverflow read <id>` | Read a question with answers and comments |
 | `opencli stackoverflow user <name>` | Find users by display name (highest reputation first) |
 | `opencli stackoverflow tag <tag>` | List questions tagged with a given tag (most active first) |
+| `opencli stackoverflow related <id>` | List questions related to a given question id |
 
 ## Listing columns
 
@@ -72,6 +73,10 @@ opencli stackoverflow unanswered --limit 10
 
 # Tagged questions (id feeds stackoverflow read)
 opencli stackoverflow tag rust --limit 10
+
+# Related questions for a given question id (rows feed stackoverflow read)
+opencli stackoverflow related 11227809 --limit 10
+opencli stackoverflow related 11227809 --sort votes --limit 5
 
 # User profile search (returns userId/profile URL rows)
 opencli stackoverflow user "Jon Skeet" --limit 5
