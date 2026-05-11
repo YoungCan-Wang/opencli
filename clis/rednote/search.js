@@ -7,7 +7,7 @@
  */
 import { cli, Strategy } from '@jackwener/opencli/registry';
 import { ArgumentError, AuthRequiredError } from '@jackwener/opencli/errors';
-import { buildSearchExtractJs, noteIdToDate } from '../xiaohongshu/search.js';
+import { buildScrollUntilJs, buildSearchExtractJs, noteIdToDate } from '../xiaohongshu/search.js';
 
 function parseLimit(raw) {
     const parsed = Number(raw);
@@ -82,7 +82,11 @@ cli({
         if (waitResult === 'login_wall') {
             throw new AuthRequiredError('www.rednote.com', 'Rednote search results are blocked behind a login wall');
         }
-        await page.autoScroll({ times: 2 });
+        // Scroll until enough rows are rendered or the lazy-load plateaus.
+        // Same fix as xiaohongshu/search (#1471): the previous fixed
+        // `autoScroll({ times: 2 })` capped extraction at ~13 notes regardless
+        // of `--limit`.
+        await page.evaluate(buildScrollUntilJs(limit));
         const payload = await page.evaluate(buildSearchExtractJs('www.rednote.com'));
         const data = Array.isArray(payload) ? payload : [];
         return data
