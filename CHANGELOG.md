@@ -1,10 +1,20 @@
 # Changelog
 
-## Unreleased
+## [1.7.18](https://github.com/jackwener/opencli/compare/v1.7.17...v1.7.18) (2026-05-12)
+
+Hotfix release for the 1.7.17 doctor regression: `opencli doctor` failed connectivity probe with `Browser session is required` because the doctor probe didn't pass a session to the new strict-session browser bridge. Also adds new adapters and adapter fixes that were ready immediately after 1.7.17.
 
 ### Bug Fixes
 
-* **doctor** — pass an internal browser session to the live connectivity probe so `opencli doctor` works with the explicit-session browser model.
+* **doctor** — pass an internal `__doctor__` browser session to the live connectivity probe so `opencli doctor` works again under the explicit-session browser model introduced in 1.7.17. ([#1485](https://github.com/jackwener/opencli/issues/1485))
+* **browser** — `--session <name>` is now declared as a `requiredOption` so Commander itself rejects calls missing the flag before runtime, and the help line is marked `(required)` instead of being hidden under `Options:`. ([#1485](https://github.com/jackwener/opencli/issues/1485))
+* **doubao/ask** — restore Assistant detection after the 2026-05 DOM refactor. ([#1484](https://github.com/jackwener/opencli/issues/1484))
+* **youtube** — request `srv3` format for caption URLs. ([#1422](https://github.com/jackwener/opencli/issues/1422))
+
+### Features
+
+* **rednote** — add `rednote.com` adapter mirroring xiaohongshu read commands. ([#1475](https://github.com/jackwener/opencli/issues/1475))
+* **reddit** — add `reply` command for replying to comments. ([#1428](https://github.com/jackwener/opencli/issues/1428))
 
 ## [1.7.17](https://github.com/jackwener/opencli/compare/v1.7.16...v1.7.17) (2026-05-12)
 
