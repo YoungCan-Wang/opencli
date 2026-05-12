@@ -83,7 +83,6 @@ A few commands override the default via `cmd.defaultFormat` (e.g. chat commands 
 | `OPENCLI_CDP_ENDPOINT` | — | Manual CDP endpoint override (dev / remote Chrome / Electron). |
 | `OPENCLI_CACHE_DIR` | `~/.opencli/cache` | Network capture + browser-state cache. |
 | `OPENCLI_WINDOW` | command-specific | `foreground` or `background` browser window mode. |
-| `OPENCLI_KEEP_TAB` | command-specific | `true` or `false`; controls whether browser tab leases are kept after a command. |
 | `OPENCLI_VERBOSE` | `false` | Verbose logging (also triggered by `-v`). |
 
 ## Self-repair
