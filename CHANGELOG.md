@@ -20,6 +20,7 @@
 
 ### Internal
 
+* **runtime** — lower the Node floor to `>=20.0.0`. Three coupled changes: drop all `util.styleText()` usage (added in Node v21.7.0 / v20.12.0; previously crashed v21.0–v21.6 at module load), downgrade `undici` from `^8.0.2` (engines `>=22.19.0`) to `^6.25.0` (engines `>=18.17`, retains `Agent` / `EnvHttpProxyAgent` / `fetch`), and lower `MIN_SUPPORTED_NODE_MAJOR` from 21 to 20 so the startup guard matches the declared `engines.node`. Smoke-tested on v20.0.0 / v21.2.0 / v22.22.2. The colored output (`[OK]` / `[WARN]` / `[FAIL]` / `ℹ` / `⚠` / `✖`) keeps its semantic markers; ANSI colors were redundant for the primarily agent-facing CLI.
 * **extension 1.0.14** — `pageScopedResult` no longer injects `session` into `data`. The field had no consumers and contaminated `exec` results with arbitrary user-JS shapes; routing-relevant identity is already exposed via `Result.page`.
 * **extension 1.0.13** — remove the internal command-session lease-key backdoor.
 
