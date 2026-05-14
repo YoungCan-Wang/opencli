@@ -22711,7 +22711,9 @@
       "retweets",
       "bookmarks",
       "created_at",
-      "url"
+      "url",
+      "has_media",
+      "media_urls"
     ],
     "type": "js",
     "modulePath": "twitter/bookmark-folder.js",
@@ -22772,7 +22774,9 @@
       "retweets",
       "bookmarks",
       "created_at",
-      "url"
+      "url",
+      "has_media",
+      "media_urls"
     ],
     "type": "js",
     "modulePath": "twitter/bookmarks.js",
