@@ -24684,6 +24684,68 @@
     "navigateBefore": "https://weibo.com"
   },
   {
+    "site": "weibo",
+    "name": "user-posts",
+    "description": "List Weibo posts from a user, optionally filtered by date range",
+    "access": "read",
+    "domain": "weibo.com",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      {
+        "name": "id",
+        "type": "str",
+        "required": true,
+        "positional": true,
+        "help": "User ID (numeric uid) or screen name"
+      },
+      {
+        "name": "start",
+        "type": "str",
+        "required": false,
+        "help": "Start date in Asia/Shanghai (YYYY-MM-DD)"
+      },
+      {
+        "name": "end",
+        "type": "str",
+        "required": false,
+        "help": "End date in Asia/Shanghai (YYYY-MM-DD)"
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "default": 20,
+        "required": false,
+        "help": "Number of posts (1-100)"
+      },
+      {
+        "name": "include-retweets",
+        "type": "boolean",
+        "default": false,
+        "required": false,
+        "help": "Include retweets"
+      }
+    ],
+    "columns": [
+      "rank",
+      "id",
+      "mblogid",
+      "author",
+      "uid",
+      "text",
+      "time",
+      "reposts",
+      "comments",
+      "likes",
+      "pic_count",
+      "url"
+    ],
+    "type": "js",
+    "modulePath": "weibo/user-posts.js",
+    "sourceFile": "weibo/user-posts.js",
+    "navigateBefore": "https://weibo.com"
+  },
+  {
     "site": "weixin",
     "name": "create-draft",
     "description": "创建微信公众号图文草稿",
